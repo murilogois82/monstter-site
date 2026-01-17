@@ -38,23 +38,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-20 items-center justify-between">
           <Link href="/">
-            <a className="flex items-center gap-2 font-heading font-bold text-2xl tracking-tighter hover:opacity-90 transition-opacity">
+            <div className="flex items-center gap-2 font-heading font-bold text-2xl tracking-tighter hover:opacity-90 transition-opacity cursor-pointer">
               <div className="relative flex items-center justify-center w-10 h-10 rounded-full border-2 border-white bg-black text-white overflow-hidden">
                 <span className="text-xs font-bold">M</span>
               </div>
               <span>
                 Mons<span className="text-primary">TT</span>er
               </span>
-            </a>
+            </div>
           </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
               <Link key={item.path} href={item.path}>
-                <a
+                <div
                   className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary relative group",
+                    "text-sm font-medium transition-colors hover:text-primary relative group cursor-pointer",
                     location === item.path ? "text-primary" : "text-gray-300"
                   )}
                 >
@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     "absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full",
                     location === item.path ? "w-full" : ""
                   )} />
-                </a>
+                </div>
               </Link>
             ))}
             <Link href="/contato">
@@ -88,15 +88,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="container py-4 flex flex-col gap-4">
               {navItems.map((item) => (
                 <Link key={item.path} href={item.path}>
-                  <a
+                  <div
                     className={cn(
-                      "text-sm font-medium transition-colors hover:text-primary p-2 block",
+                      "text-sm font-medium transition-colors hover:text-primary p-2 block cursor-pointer",
                       location === item.path ? "text-primary bg-white/5" : "text-gray-300"
                     )}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.label}
-                  </a>
+                  </div>
                 </Link>
               ))}
               <Link href="/contato">
@@ -132,7 +132,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {navItems.map((item) => (
                 <li key={item.path}>
                   <Link href={item.path}>
-                    <a className="hover:text-primary transition-colors">{item.label}</a>
+                    <span className="hover:text-primary transition-colors cursor-pointer">{item.label}</span>
                   </Link>
                 </li>
               ))}
