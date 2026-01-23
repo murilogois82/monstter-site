@@ -28,6 +28,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import Layout from "@/components/Layout";
+import AdminNav from "@/components/AdminNav";
 
 export default function AdminServiceOrders() {
   const { user, isAuthenticated } = useAuth();
@@ -49,6 +51,7 @@ export default function AdminServiceOrders() {
 
   if (!isAuthenticated || (user?.role !== "admin" && user?.role !== "manager")) {
     return (
+      <Layout>
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="w-full max-w-md">
           <CardHeader>
@@ -61,6 +64,7 @@ export default function AdminServiceOrders() {
           </CardContent>
         </Card>
       </div>
+      </Layout>
     );
   }
 
@@ -122,7 +126,9 @@ export default function AdminServiceOrders() {
   }, {} as Record<number, { count: number; totalHours: number }>);
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <Layout>
+      <AdminNav />
+      <div className="min-h-screen bg-background py-12 px-4">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Cabeçalho */}
         <div>
@@ -308,5 +314,6 @@ export default function AdminServiceOrders() {
         </Card>
       </div>
     </div>
+    </Layout>
   );
 }

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import Layout from "@/components/Layout";
+import AdminNav from "@/components/AdminNav";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,7 +143,9 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <Layout>
+      <AdminNav />
+      <div className="min-h-screen bg-background py-12 px-4">
       <div className="max-w-7xl mx-auto">
         <Card>
           <CardHeader className="bg-gradient-to-r from-red-500 to-red-700 text-white">
@@ -330,5 +334,6 @@ export default function UserManagement() {
         </Dialog>
       </div>
     </div>
+    </Layout>
   );
 }

@@ -1,5 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import Layout from "@/components/Layout";
+import AdminNav from "@/components/AdminNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLocation } from "wouter";
@@ -159,7 +161,9 @@ export default function PaymentsDashboard() {
     }));
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <Layout>
+      <AdminNav />
+      <div className="min-h-screen bg-background py-12 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard de Pagamentos</h1>
@@ -341,5 +345,6 @@ export default function PaymentsDashboard() {
         </Card>
       </div>
     </div>
+    </Layout>
   );
 }
