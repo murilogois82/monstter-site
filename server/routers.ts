@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createContactMessage, getAllContactMessages, updateContactMessageStatus } from "./db";
+import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners } from "./db";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -62,6 +62,203 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+
+  // Service Orders Router
+  serviceOrder: router({
+    // Create a new service order (partner)
+    create: protectedProcedure
+      .input(z.object({
+        osNumber: z.string().min(1, "Número da OS é obrigatório"),
+        clientName: z.string().min(2, "Nome do cliente é obrigatório"),
+        clientEmail: z.string().email("E-mail do cliente inválido"),
+        serviceType: z.string().min(2, "Tipo de serviço é obrigatório"),
+        startDateTime: z.date(),
+        interval: z.number().optional(),
+        endDateTime: z.date().optional(),
+        totalHours: z.number().optional(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const partner = await getPartnerByUserId(ctx.user.id);
+        if (!partner) {
+          throw new Error("Parceiro não encontrado");
+        }
+
+        const result = await createServiceOrder({
+          osNumber: input.osNumber,
+          status: "draft",
+          partnerId: partner.id,
+          clientName: input.clientName,
+          clientEmail: input.clientEmail,
+          serviceType: input.serviceType,
+          startDateTime: input.startDateTime,
+          interval: input.interval || null,
+          endDateTime: input.endDateTime || null,
+          totalHours: input.totalHours ? String(input.totalHours) : null,
+          description: input.description || null,
+        });
+
+        if (!result) {
+          throw new Error("Falha ao criar ordem de serviço");
+        }
+
+        return { success: true, id: result.id, osNumber: result.osNumber };
+      }),
+
+    // Update a service order
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(["draft", "sent", "in_progress", "completed", "closed"]).optional(),
+        endDateTime: z.date().optional(),
+        totalHours: z.number().optional(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const result = await updateServiceOrder(input.id, {
+          status: input.status as any,
+          endDateTime: input.endDateTime || undefined,
+          totalHours: input.totalHours ? String(input.totalHours) : undefined,
+          description: input.description || undefined,
+        });
+
+        if (!result) {
+          throw new Error("Falha ao atualizar ordem de serviço");
+        }
+
+        return { success: true, id: result.id };
+      }),
+
+    // Get a service order by ID
+    getById: protectedProcedure
+      .input(z.number())
+      .query(async ({ input }) => {
+        return await getServiceOrderById(input);
+      }),
+
+    // List service orders for the current partner
+    listMine: protectedProcedure.query(async ({ ctx }) => {
+      const partner = await getPartnerByUserId(ctx.user.id);
+      if (!partner) {
+        return [];
+      }
+      return await getServiceOrdersByPartnerId(partner.id);
+    }),
+
+    // List all service orders (admin/manager only)
+    listAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+        throw new Error("Acesso negado");
+      }
+      return await getAllServiceOrders();
+    }),
+
+    // List service orders by status
+    listByStatus: protectedProcedure
+      .input(z.string())
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        return await getServiceOrdersByStatus(input);
+      }),
+
+    // Send a service order (change status to sent)
+    send: protectedProcedure
+      .input(z.number())
+      .mutation(async ({ input }) => {
+        const result = await updateServiceOrder(input, { status: "sent" });
+        if (!result) {
+          throw new Error("Falha ao enviar ordem de serviço");
+        }
+        return { success: true, id: result.id };
+      }),
+
+    // Close a service order
+    close: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        paymentAmount: z.number().optional(),
+        paymentStatus: z.enum(["pending", "scheduled", "completed"]).optional(),
+        paymentDate: z.date().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+
+        const order = await getServiceOrderById(input.id);
+        if (!order) {
+          throw new Error("Ordem de serviço não encontrada");
+        }
+
+        // Update order status to closed
+        await updateServiceOrder(input.id, { status: "closed" });
+
+        // Add payment information if provided
+        if (input.paymentAmount) {
+          await createOSPayment({
+            osId: input.id,
+            partnerId: order.partnerId,
+            amount: String(input.paymentAmount),
+            paymentStatus: (input.paymentStatus || "pending") as any,
+            paymentDate: input.paymentDate || null,
+            notes: input.notes || null,
+          });
+        }
+
+        return { success: true, id: input.id };
+      }),
+  }),
+
+  // Payments Router
+  payment: router({
+    // Get payments for the current partner
+    listMine: protectedProcedure.query(async ({ ctx }) => {
+      const partner = await getPartnerByUserId(ctx.user.id);
+      if (!partner) {
+        return [];
+      }
+      return await getPaymentsByPartnerId(partner.id);
+    }),
+
+    // Update payment status (admin/manager only)
+    updateStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(["pending", "scheduled", "completed"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+
+        const result = await updateOSPayment(input.id, { paymentStatus: input.status as any });
+        if (!result) {
+          throw new Error("Falha ao atualizar pagamento");
+        }
+
+        return { success: true, id: result.id };
+      }),
+  }),
+
+  // Partners Router
+  partner: router({
+    // Get current partner info
+    me: protectedProcedure.query(async ({ ctx }) => {
+      return await getPartnerByUserId(ctx.user.id);
+    }),
+
+    // List all partners (admin only)
+    listAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") {
+        throw new Error("Acesso negado");
+      }
+      return await getAllPartners();
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
+

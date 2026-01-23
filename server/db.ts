@@ -140,3 +140,210 @@ export async function updateContactMessageStatus(id: number, status: "pending" |
     throw error;
   }
 }
+
+// ===== Service Orders =====
+
+import { serviceOrders, InsertServiceOrder, ServiceOrder, osPayments, InsertOSPayment, OSPayment, partners, InsertPartner, Partner } from "../drizzle/schema";
+import { and, gte, lte } from "drizzle-orm";
+
+export async function createServiceOrder(order: InsertServiceOrder): Promise<ServiceOrder | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create service order: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(serviceOrders).values(order);
+    const insertId = result[0].insertId;
+    
+    const [created] = await db.select().from(serviceOrders).where(eq(serviceOrders.id, insertId)).limit(1);
+    return created || null;
+  } catch (error) {
+    console.error("[Database] Failed to create service order:", error);
+    throw error;
+  }
+}
+
+export async function updateServiceOrder(id: number, data: Partial<InsertServiceOrder>): Promise<ServiceOrder | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update service order: database not available");
+    return null;
+  }
+
+  try {
+    await db.update(serviceOrders).set(data).where(eq(serviceOrders.id, id));
+    const [updated] = await db.select().from(serviceOrders).where(eq(serviceOrders.id, id)).limit(1);
+    return updated || null;
+  } catch (error) {
+    console.error("[Database] Failed to update service order:", error);
+    throw error;
+  }
+}
+
+export async function getServiceOrderById(id: number): Promise<ServiceOrder | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get service order: database not available");
+    return null;
+  }
+
+  try {
+    const [order] = await db.select().from(serviceOrders).where(eq(serviceOrders.id, id)).limit(1);
+    return order || null;
+  } catch (error) {
+    console.error("[Database] Failed to get service order:", error);
+    throw error;
+  }
+}
+
+export async function getServiceOrdersByPartnerId(partnerId: number): Promise<ServiceOrder[]> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get service orders: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select().from(serviceOrders).where(eq(serviceOrders.partnerId, partnerId)).orderBy(desc(serviceOrders.createdAt));
+  } catch (error) {
+    console.error("[Database] Failed to get service orders:", error);
+    throw error;
+  }
+}
+
+export async function getAllServiceOrders(): Promise<ServiceOrder[]> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get service orders: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select().from(serviceOrders).orderBy(desc(serviceOrders.createdAt));
+  } catch (error) {
+    console.error("[Database] Failed to get service orders:", error);
+    throw error;
+  }
+}
+
+export async function getServiceOrdersByStatus(status: string): Promise<ServiceOrder[]> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get service orders: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select().from(serviceOrders).where(eq(serviceOrders.status, status as any)).orderBy(desc(serviceOrders.createdAt));
+  } catch (error) {
+    console.error("[Database] Failed to get service orders:", error);
+    throw error;
+  }
+}
+
+// ===== OS Payments =====
+
+export async function createOSPayment(payment: InsertOSPayment): Promise<OSPayment | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create OS payment: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(osPayments).values(payment);
+    const insertId = result[0].insertId;
+    
+    const [created] = await db.select().from(osPayments).where(eq(osPayments.id, insertId)).limit(1);
+    return created || null;
+  } catch (error) {
+    console.error("[Database] Failed to create OS payment:", error);
+    throw error;
+  }
+}
+
+export async function updateOSPayment(id: number, data: Partial<InsertOSPayment>): Promise<OSPayment | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update OS payment: database not available");
+    return null;
+  }
+
+  try {
+    await db.update(osPayments).set(data).where(eq(osPayments.id, id));
+    const [updated] = await db.select().from(osPayments).where(eq(osPayments.id, id)).limit(1);
+    return updated || null;
+  } catch (error) {
+    console.error("[Database] Failed to update OS payment:", error);
+    throw error;
+  }
+}
+
+export async function getPaymentsByPartnerId(partnerId: number): Promise<OSPayment[]> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get payments: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select().from(osPayments).where(eq(osPayments.partnerId, partnerId)).orderBy(desc(osPayments.createdAt));
+  } catch (error) {
+    console.error("[Database] Failed to get payments:", error);
+    throw error;
+  }
+}
+
+// ===== Partners =====
+
+export async function createPartner(partner: InsertPartner): Promise<Partner | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create partner: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(partners).values(partner);
+    const insertId = result[0].insertId;
+    
+    const [created] = await db.select().from(partners).where(eq(partners.id, insertId)).limit(1);
+    return created || null;
+  } catch (error) {
+    console.error("[Database] Failed to create partner:", error);
+    throw error;
+  }
+}
+
+export async function getPartnerByUserId(userId: number): Promise<Partner | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get partner: database not available");
+    return null;
+  }
+
+  try {
+    const [partner] = await db.select().from(partners).where(eq(partners.userId, userId)).limit(1);
+    return partner || null;
+  } catch (error) {
+    console.error("[Database] Failed to get partner:", error);
+    throw error;
+  }
+}
+
+export async function getAllPartners(): Promise<Partner[]> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get partners: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select().from(partners).orderBy(desc(partners.createdAt));
+  } catch (error) {
+    console.error("[Database] Failed to get partners:", error);
+    throw error;
+  }
+}

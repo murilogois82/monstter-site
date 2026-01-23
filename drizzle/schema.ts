@@ -1,4 +1,5 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar, datetime } from "drizzle-orm/mysql-core";
+import { relations } from "drizzle-orm";
 
 /**
  * Core user table backing auth flow.
@@ -16,7 +17,7 @@ export const users = mysqlTable("users", {
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  role: mysqlEnum("role", ["user", "admin", "partner", "manager"]).default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -41,3 +42,88 @@ export const contactMessages = mysqlTable("contact_messages", {
 
 export type ContactMessage = typeof contactMessages.$inferSelect;
 export type InsertContactMessage = typeof contactMessages.$inferInsert;
+
+/**
+ * Tabela para armazenar parceiros/consultores que criam ordens de serviço.
+ */
+export const partners = mysqlTable("partners", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  companyName: varchar("companyName", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 30 }),
+  role: mysqlEnum("role", ["partner", "manager", "admin"]).default("partner").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Partner = typeof partners.$inferSelect;
+export type InsertPartner = typeof partners.$inferInsert;
+
+/**
+ * Tabela para armazenar ordens de serviço.
+ */
+export const serviceOrders = mysqlTable("service_orders", {
+  id: int("id").autoincrement().primaryKey(),
+  osNumber: varchar("osNumber", { length: 50 }).notNull().unique(),
+  status: mysqlEnum("status", ["draft", "sent", "in_progress", "completed", "closed"]).default("draft").notNull(),
+  partnerId: int("partnerId").notNull(),
+  clientName: varchar("clientName", { length: 255 }).notNull(),
+  clientEmail: varchar("clientEmail", { length: 320 }).notNull(),
+  serviceType: varchar("serviceType", { length: 255 }).notNull(),
+  startDateTime: datetime("startDateTime").notNull(),
+  interval: int("interval"), // em minutos
+  endDateTime: datetime("endDateTime"),
+  totalHours: decimal("totalHours", { precision: 10, scale: 2 }),
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ServiceOrder = typeof serviceOrders.$inferSelect;
+export type InsertServiceOrder = typeof serviceOrders.$inferInsert;
+
+/**
+ * Tabela para armazenar informações de pagamento das ordens de serviço.
+ */
+export const osPayments = mysqlTable("os_payments", {
+  id: int("id").autoincrement().primaryKey(),
+  osId: int("osId").notNull(),
+  partnerId: int("partnerId").notNull(),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  paymentStatus: mysqlEnum("paymentStatus", ["pending", "scheduled", "completed"]).default("pending").notNull(),
+  paymentDate: datetime("paymentDate"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type OSPayment = typeof osPayments.$inferSelect;
+export type InsertOSPayment = typeof osPayments.$inferInsert;
+
+/**
+ * Relações entre tabelas
+ */
+export const partnersRelations = relations(partners, ({ many }) => ({
+  serviceOrders: many(serviceOrders),
+  payments: many(osPayments),
+}));
+
+export const serviceOrdersRelations = relations(serviceOrders, ({ one, many }) => ({
+  partner: one(partners, {
+    fields: [serviceOrders.partnerId],
+    references: [partners.id],
+  }),
+  payments: many(osPayments),
+}));
+
+export const osPaymentsRelations = relations(osPayments, ({ one }) => ({
+  serviceOrder: one(serviceOrders, {
+    fields: [osPayments.osId],
+    references: [serviceOrders.id],
+  }),
+  partner: one(partners, {
+    fields: [osPayments.partnerId],
+    references: [partners.id],
+  }),
+}));

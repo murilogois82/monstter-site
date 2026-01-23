@@ -15,6 +15,13 @@
       "when": 1768647350180,
       "tag": "0001_flimsy_slipstream",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1769199549470,
+      "tag": "0002_pale_trish_tilby",
+      "breakpoints": true
     }
   ]
 }
