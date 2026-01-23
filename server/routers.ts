@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners, getAllUsers, getUserById, updateUserRole, createUser } from "./db";
+import { clientRouter } from "./clients";
 import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
 import { z } from "zod";
 
@@ -271,6 +272,9 @@ export const appRouter = router({
       return await getAllPartners();
     }),
   }),
+
+  // Clients Router (Admin/Manager only)
+  clientManagement: clientRouter,
 
   // User Management Router (Admin only)
   userManagement: router({

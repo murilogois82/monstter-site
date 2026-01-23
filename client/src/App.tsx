@@ -13,6 +13,7 @@ import PartnerServiceOrders from "./pages/PartnerServiceOrders";
 import AdminServiceOrders from "./pages/AdminServiceOrders";
 import PaymentsDashboard from "./pages/PaymentsDashboard";
 import UserManagement from "./pages/UserManagement";
+import ClientManagement from "./pages/ClientManagement";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -27,6 +28,8 @@ function Router() {
       <Route path={"/admin/service-orders"} component={AdminServiceOrders} />
       <Route path={"/admin/payments-dashboard"} component={PaymentsDashboard} />
       <Route path={"/admin/users"} component={UserManagement} />
+      <Route path={"/admin/clients"} component={ClientManagement} />
+      <Route path={"/admin"} component={AdminServiceOrders} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

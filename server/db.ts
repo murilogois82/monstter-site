@@ -19,7 +19,7 @@ export async function getDb() {
   return _db;
 }
 
-export async function upsertUser(user: InsertUser): Promise<void> {
+export async function upsertUser(user: InsertUser): Promise<{ id: number } | undefined> {
   if (!user.openId) {
     throw new Error("User openId is required for upsert");
   }
@@ -72,6 +72,10 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     await db.insert(users).values(values).onDuplicateKeyUpdate({
       set: updateSet,
     });
+
+    // Buscar e retornar o usuário criado/atualizado
+    const [updatedUser] = await db.select().from(users).where(eq(users.openId, user.openId)).limit(1);
+    return updatedUser ? { id: updatedUser.id } : undefined;
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
