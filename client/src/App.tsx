@@ -8,6 +8,11 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
+import ServiceOrderForm from "./pages/ServiceOrderForm";
+import PartnerServiceOrders from "./pages/PartnerServiceOrders";
+import AdminServiceOrders from "./pages/AdminServiceOrders";
+import PaymentsDashboard from "./pages/PaymentsDashboard";
+import UserManagement from "./pages/UserManagement";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -17,6 +22,11 @@ function Router() {
       <Route path={"/sobre"} component={About} />
       <Route path={"/servicos"} component={Services} />
       <Route path={"/contato"} component={Contact} />
+      <Route path={"/service-order-form"} component={ServiceOrderForm} />
+      <Route path={"/partners/service-orders"} component={PartnerServiceOrders} />
+      <Route path={"/admin/service-orders"} component={AdminServiceOrders} />
+      <Route path={"/admin/payments-dashboard"} component={PaymentsDashboard} />
+      <Route path={"/admin/users"} component={UserManagement} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

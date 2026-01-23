@@ -2,7 +2,8 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners } from "./db";
+import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners, getAllUsers, getUserById, updateUserRole, createUser } from "./db";
+import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -167,10 +168,22 @@ export const appRouter = router({
     send: protectedProcedure
       .input(z.number())
       .mutation(async ({ input }) => {
+        const order = await getServiceOrderById(input);
+        if (!order) {
+          throw new Error("Ordem de serviço não encontrada");
+        }
+
         const result = await updateServiceOrder(input, { status: "sent" });
         if (!result) {
           throw new Error("Falha ao enviar ordem de serviço");
         }
+
+        // Enviar e-mail para o cliente
+        await sendServiceOrderEmail(order, order.clientName, order.clientEmail);
+
+        // Notificar gestor (e-mail fixo ou buscar do banco)
+        await notifyManagerOSSent(order, "atendimento@monstter.com.br");
+
         return { success: true, id: result.id };
       }),
 
@@ -257,6 +270,71 @@ export const appRouter = router({
       }
       return await getAllPartners();
     }),
+  }),
+
+  // User Management Router (Admin only)
+  userManagement: router({
+    // List all users
+    listAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") {
+        throw new Error("Acesso negado");
+      }
+      return await getAllUsers();
+    }),
+
+    // Create a new user
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+        email: z.string().email("E-mail inválido"),
+        role: z.enum(["user", "admin", "partner", "manager"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Acesso negado");
+        }
+
+        const result = await createUser({
+          name: input.name,
+          email: input.email,
+          role: input.role,
+        });
+
+        if (!result) {
+          throw new Error("Falha ao criar usuário");
+        }
+
+        return { success: true, id: result.id };
+      }),
+
+    // Update user role (activate/deactivate via role change)
+    updateRole: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        role: z.enum(["user", "admin", "partner", "manager"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Acesso negado");
+        }
+
+        const result = await updateUserRole(input.id, input.role);
+        if (!result) {
+          throw new Error("Falha ao atualizar usuário");
+        }
+
+        return { success: true, id: result.id };
+      }),
+
+    // Get user by ID
+    getById: protectedProcedure
+      .input(z.number())
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Acesso negado");
+        }
+        return await getUserById(input);
+      }),
   }),
 });
 

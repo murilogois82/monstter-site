@@ -1,4 +1,18 @@
 import { ServiceOrder } from "../drizzle/schema";
+import nodemailer from "nodemailer";
+
+/**
+ * Configuração do transportador SMTP
+ */
+const transporter = nodemailer.createTransport({
+  host: "smtps.uhserver.com",
+  port: 465,
+  secure: true, // SSL/TLS
+  auth: {
+    user: "atendimento@monstter.com.br",
+    pass: "#Monstter@2026",
+  },
+});
 
 /**
  * Template HTML para o e-mail de Ordem de Serviço
@@ -177,8 +191,7 @@ function getStatusLabel(status: string): string {
 }
 
 /**
- * Enviar e-mail de Ordem de Serviço (placeholder para integração futura)
- * TODO: Integrar com serviço de e-mail real (SendGrid, AWS SES, etc.)
+ * Enviar e-mail de Ordem de Serviço
  */
 export async function sendServiceOrderEmail(
   order: ServiceOrder,
@@ -188,21 +201,12 @@ export async function sendServiceOrderEmail(
   try {
     const htmlContent = generateOSEmailTemplate(order, clientName);
 
-    // TODO: Implementar envio real de e-mail
-    // Exemplo com Manus Built-in API ou SendGrid:
-    // const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Bearer ${SENDGRID_API_KEY}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     personalizations: [{ to: [{ email: recipientEmail }] }],
-    //     from: { email: 'noreply@monstter.com.br' },
-    //     subject: `Ordem de Serviço #${order.osNumber}`,
-    //     content: [{ type: 'text/html', value: htmlContent }],
-    //   }),
-    // });
+    await transporter.sendMail({
+      from: '"Monstter Consultoria" <atendimento@monstter.com.br>',
+      to: recipientEmail,
+      subject: `Ordem de Serviço #${order.osNumber}`,
+      html: htmlContent,
+    });
 
     console.log("[Email] Ordem de Serviço enviada para:", recipientEmail);
     console.log("[Email] Número da OS:", order.osNumber);
@@ -251,11 +255,32 @@ export async function notifyManagerOSSent(
       </html>
     `;
 
+    await transporter.sendMail({
+      from: '"Monstter Consultoria" <atendimento@monstter.com.br>',
+      to: managerEmail,
+      subject: `Nova OS Enviada - #${order.osNumber}`,
+      html: htmlContent,
+    });
+
     console.log("[Email] Notificação de OS enviada para gestor:", managerEmail);
 
     return true;
   } catch (error) {
     console.error("[Email] Erro ao notificar gestor:", error);
+    return false;
+  }
+}
+
+/**
+ * Verificar conexão SMTP
+ */
+export async function verifyEmailConnection(): Promise<boolean> {
+  try {
+    await transporter.verify();
+    console.log("[Email] Servidor SMTP conectado com sucesso");
+    return true;
+  } catch (error) {
+    console.error("[Email] Erro ao conectar com servidor SMTP:", error);
     return false;
   }
 }

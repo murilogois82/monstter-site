@@ -90,6 +90,75 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get users: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  } catch (error) {
+    console.error("[Database] Failed to get users:", error);
+    throw error;
+  }
+}
+
+export async function getUserById(id: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateUserRole(id: number, role: "user" | "admin" | "partner" | "manager") {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update user: database not available");
+    return null;
+  }
+
+  try {
+    await db.update(users).set({ role }).where(eq(users.id, id));
+    return await getUserById(id);
+  } catch (error) {
+    console.error("[Database] Failed to update user role:", error);
+    throw error;
+  }
+}
+
+export async function createUser(userData: { name: string; email: string; role: "user" | "admin" | "partner" | "manager" }) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create user: database not available");
+    return null;
+  }
+
+  try {
+    // Gerar um openId temporário para usuários criados manualmente
+    const openId = `manual_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    const result = await db.insert(users).values({
+      openId,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      loginMethod: "manual",
+    });
+    
+    const insertId = result[0].insertId;
+    return await getUserById(insertId);
+  } catch (error) {
+    console.error("[Database] Failed to create user:", error);
+    throw error;
+  }
+}
+
 // ===== Contact Messages =====
 
 export async function createContactMessage(message: InsertContactMessage): Promise<ContactMessage | null> {
