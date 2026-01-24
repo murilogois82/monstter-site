@@ -21,3 +21,12 @@
 - [x] Descontar intervalo do cálculo de horas totais
 - [x] Cliente como seleção do cadastro (dropdown)
 - [x] Número de OS automático com código sequencial
+
+## Relatório de Prestação de Serviço
+
+- [x] Atualizar schema com campos de pagamento (tipo fixo/hora, valor cobrado, valor pago)
+- [x] Criar tabela de parceiros com vínculo a usuários e clientes
+- [x] Criar APIs para cálculo de valores por período
+- [x] Criar página de relatório de prestação de serviço
+- [x] Implementar export em PDF
+- [x] Testar geração de relatório

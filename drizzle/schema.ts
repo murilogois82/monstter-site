@@ -57,6 +57,8 @@ export const clients = mysqlTable("clients", {
   city: varchar("city", { length: 100 }),
   state: varchar("state", { length: 2 }),
   zipCode: varchar("zipCode", { length: 20 }),
+  paymentType: mysqlEnum("paymentType", ["fixed", "hourly"]).default("hourly").notNull(),
+  chargedValue: decimal("chargedValue", { precision: 12, scale: 2 }), // Valor cobrado do cliente
   status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -75,7 +77,10 @@ export const partners = mysqlTable("partners", {
   companyName: varchar("companyName", { length: 255 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
   phone: varchar("phone", { length: 30 }),
+  paymentType: mysqlEnum("paymentType", ["fixed", "hourly"]).default("hourly").notNull(),
+  paidValue: decimal("paidValue", { precision: 12, scale: 2 }), // Valor pago ao consultor
   role: mysqlEnum("role", ["partner", "manager", "admin"]).default("partner").notNull(),
+  status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

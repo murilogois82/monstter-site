@@ -5,6 +5,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners, getAllUsers, getUserById, updateUserRole, createUser } from "./db";
 import { clientRouter } from "./clients";
 import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
+import { generateClientServiceReport, generatePartnerPaymentReport, getClientsWithOrdersInPeriod } from "./serviceReports";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -357,6 +358,50 @@ export const appRouter = router({
           throw new Error("Acesso negado");
         }
         return await getUserById(input);
+      }),
+  }),
+
+  // Service Reports Router
+  serviceReports: router({
+    // Generate client service report
+    generateClientReport: protectedProcedure
+      .input(z.object({
+        clientId: z.number(),
+        periodStart: z.date(),
+        periodEnd: z.date(),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        return await generateClientServiceReport(input.clientId, input.periodStart, input.periodEnd);
+      }),
+
+    // Generate partner payment report
+    generatePartnerReport: protectedProcedure
+      .input(z.object({
+        partnerId: z.number(),
+        periodStart: z.date(),
+        periodEnd: z.date(),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        return await generatePartnerPaymentReport(input.partnerId, input.periodStart, input.periodEnd);
+      }),
+
+    // Get clients with orders in period
+    getClientsInPeriod: protectedProcedure
+      .input(z.object({
+        periodStart: z.date(),
+        periodEnd: z.date(),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        return await getClientsWithOrdersInPeriod(input.periodStart, input.periodEnd);
       }),
   }),
 });
