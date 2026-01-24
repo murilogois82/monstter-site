@@ -46,7 +46,7 @@ export const clientRouter = router({
         email: input.email,
         phone: input.phone,
         company: input.company,
-        cnpj: input.cnpj,
+        document: input.cnpj,
         address: input.address,
         city: input.city,
         state: input.state,
