@@ -6,3 +6,12 @@
 - [x] Dashboard de pagamentos com gráficos
 - [x] Configurar rotas e navegação
 - [x] Testar e publicar
+
+## Configuração SMTP e Importação de Clientes
+
+- [x] Configurar variáveis de ambiente para SMTP
+- [x] Atualizar função de envio de e-mail com credenciais SMTP
+- [x] Criar API de importação em massa de clientes (CSV/Excel)
+- [x] Criar interface de upload de arquivos
+- [x] Validar e processar dados importados
+- [x] Testar envio de e-mail e importação

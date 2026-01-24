@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import ClientImport from "@/components/ClientImport";
 
 export default function ClientManagement() {
   const { user, isAuthenticated } = useAuth();
@@ -177,6 +178,11 @@ export default function ClientManagement() {
       <AdminNav />
       <div className="min-h-screen bg-background py-12 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Componente de Importação em Massa */}
+          <div className="mb-6">
+            <ClientImport onImportComplete={() => refetch()} />
+          </div>
+
           <Card>
             <CardHeader className="bg-gradient-to-r from-red-500 to-red-700 text-white">
               <div className="flex justify-between items-center">

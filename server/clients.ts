@@ -183,4 +183,74 @@ export const clientRouter = router({
 
       return { success: true };
     }),
+
+  /**
+   * Importar clientes em massa via CSV/Excel
+   */
+  importBulk: publicProcedure
+    .input(
+      z.object({
+        clients: z.array(
+          z.object({
+            name: z.string(),
+            email: z.string().email(),
+            phone: z.string().optional(),
+            company: z.string().optional(),
+            document: z.string().optional(),
+            address: z.string().optional(),
+            city: z.string().optional(),
+            state: z.string().optional(),
+            zipCode: z.string().optional(),
+            notes: z.string().optional(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Verificar se usuário está autenticado e é admin
+      if (!ctx.user || (ctx.user.role !== "admin" && ctx.user.role !== "manager")) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Apenas administradores podem importar clientes",
+        });
+      }
+
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Banco de dados não disponível",
+        });
+      }
+
+      const results = {
+        success: 0,
+        failed: 0,
+        errors: [] as string[],
+      };
+
+      for (const client of input.clients) {
+        try {
+          await db.insert(clients).values({
+            name: client.name,
+            email: client.email,
+            phone: client.phone,
+            company: client.company,
+            document: client.document,
+            address: client.address,
+            city: client.city,
+            state: client.state,
+            zipCode: client.zipCode,
+            notes: client.notes,
+            status: "active",
+          });
+          results.success++;
+        } catch (error) {
+          results.failed++;
+          results.errors.push(`Erro ao importar ${client.name}: ${error}`);
+        }
+      }
+
+      return results;
+    }),
 });

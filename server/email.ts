@@ -5,12 +5,12 @@ import nodemailer from "nodemailer";
  * Configuração do transportador SMTP
  */
 const transporter = nodemailer.createTransport({
-  host: "smtps.uhserver.com",
-  port: 465,
+  host: process.env.SMTP_HOST || "smtps.uhserver.com",
+  port: parseInt(process.env.SMTP_PORT || "465"),
   secure: true, // SSL/TLS
   auth: {
-    user: "atendimento@monstter.com.br",
-    pass: "#Monstter@2026",
+    user: process.env.SMTP_USER || "atendimento@monstter.com.br",
+    pass: process.env.SMTP_PASS || "",
   },
 });
 
