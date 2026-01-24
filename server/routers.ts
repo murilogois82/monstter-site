@@ -6,6 +6,7 @@ import { createContactMessage, getAllContactMessages, updateContactMessageStatus
 import { clientRouter } from "./clients";
 import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
 import { generateClientServiceReport, generatePartnerPaymentReport, getClientsWithOrdersInPeriod } from "./serviceReports";
+import { calculateFinancialMetrics, getMonthlyComparison, getConsultantMetrics, getUtilizationRate } from "./financialMetrics";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -402,6 +403,56 @@ export const appRouter = router({
           throw new Error("Acesso negado");
         }
         return await getClientsWithOrdersInPeriod(input.periodStart, input.periodEnd);
+      }),
+  }),
+
+  // Financial Metrics Router
+  financialMetrics: router({
+    getMetrics: protectedProcedure
+      .input(z.object({
+        periodStart: z.date(),
+        periodEnd: z.date(),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        return await calculateFinancialMetrics(input.periodStart, input.periodEnd);
+      }),
+
+    getMonthlyComparison: protectedProcedure
+      .input(z.object({
+        year: z.number().min(2020).max(2100),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        return await getMonthlyComparison(input.year);
+      }),
+
+    getConsultantMetrics: protectedProcedure
+      .input(z.object({
+        periodStart: z.date(),
+        periodEnd: z.date(),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        return await getConsultantMetrics(input.periodStart, input.periodEnd);
+      }),
+
+    getUtilizationRate: protectedProcedure
+      .input(z.object({
+        periodStart: z.date(),
+        periodEnd: z.date(),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        return await getUtilizationRate(input.periodStart, input.periodEnd);
       }),
   }),
 });

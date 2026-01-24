@@ -30,3 +30,10 @@
 - [x] Criar página de relatório de prestação de serviço
 - [x] Implementar export em PDF
 - [x] Testar geração de relatório
+
+## Dashboard de Análise Financeira
+
+- [x] Criar APIs para cálculo de métricas financeiras (receita, lucro, horas)
+- [x] Criar página de dashboard com gráficos (receita, margem, horas faturáveis)
+- [x] Implementar comparativo mensal e filtros por período
+- [x] Testar dashboard financeiro
