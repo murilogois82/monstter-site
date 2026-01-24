@@ -67,10 +67,28 @@ export const appRouter = router({
 
   // Service Orders Router
   serviceOrder: router({
+    // Get next OS number (sequential)
+    getNextOSNumber: protectedProcedure.query(async () => {
+      const allOrders = await getAllServiceOrders();
+      const lastOrder = allOrders[allOrders.length - 1];
+      let nextNumber = 1;
+      
+      if (lastOrder && lastOrder.osNumber) {
+        const match = lastOrder.osNumber.match(/(\d+)$/);
+        if (match) {
+          nextNumber = parseInt(match[1]) + 1;
+        }
+      }
+      
+      const year = new Date().getFullYear();
+      return `OS-${year}-${String(nextNumber).padStart(4, '0')}`;
+    }),
+
     // Create a new service order (partner)
     create: protectedProcedure
       .input(z.object({
         osNumber: z.string().min(1, "Número da OS é obrigatório"),
+        clientId: z.number().optional(),
         clientName: z.string().min(2, "Nome do cliente é obrigatório"),
         clientEmail: z.string().email("E-mail do cliente inválido"),
         serviceType: z.string().min(2, "Tipo de serviço é obrigatório"),
@@ -90,6 +108,7 @@ export const appRouter = router({
           osNumber: input.osNumber,
           status: "draft",
           partnerId: partner.id,
+          clientId: input.clientId || null,
           clientName: input.clientName,
           clientEmail: input.clientEmail,
           serviceType: input.serviceType,

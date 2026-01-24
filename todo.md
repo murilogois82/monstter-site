@@ -15,3 +15,9 @@
 - [x] Criar interface de upload de arquivos
 - [x] Validar e processar dados importados
 - [x] Testar envio de e-mail e importação
+
+## Correções na Ordem de Serviço
+
+- [x] Descontar intervalo do cálculo de horas totais
+- [x] Cliente como seleção do cadastro (dropdown)
+- [x] Número de OS automático com código sequencial

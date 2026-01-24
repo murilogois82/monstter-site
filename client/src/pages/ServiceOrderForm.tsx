@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function ServiceOrderForm() {
   const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [formData, setFormData] = useState({
     osNumber: "",
     clientName: "",
@@ -23,7 +32,27 @@ export default function ServiceOrderForm() {
     description: "",
   });
 
+  // Buscar lista de clientes
+  const { data: clients } = trpc.clientManagement.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  // Buscar próximo número de OS
+  const { data: nextOSNumber } = trpc.serviceOrder.getNextOSNumber.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
   const createOSMutation = trpc.serviceOrder.create.useMutation();
+
+  // Preencher número de OS automaticamente quando carregar
+  useEffect(() => {
+    if (nextOSNumber && !formData.osNumber) {
+      setFormData((prev) => ({
+        ...prev,
+        osNumber: nextOSNumber,
+      }));
+    }
+  }, [nextOSNumber]);
 
   if (!isAuthenticated) {
     return (
@@ -53,24 +82,43 @@ export default function ServiceOrderForm() {
     }));
   };
 
+  const handleClientSelect = (clientId: string) => {
+    setSelectedClientId(clientId);
+    const selectedClient = clients?.find((c) => c.id === parseInt(clientId));
+    if (selectedClient) {
+      setFormData((prev) => ({
+        ...prev,
+        clientName: selectedClient.name,
+        clientEmail: selectedClient.email,
+      }));
+    }
+  };
+
   const calculateTotalHours = () => {
     if (!formData.startDateTime || !formData.endDateTime) return 0;
-    
+
     const start = new Date(formData.startDateTime);
     const end = new Date(formData.endDateTime);
     const diffMs = end.getTime() - start.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
-    
-    return Math.round(diffHours * 100) / 100;
+    let diffHours = diffMs / (1000 * 60 * 60);
+
+    // Descontar intervalo (em minutos) do total de horas
+    if (formData.interval) {
+      const intervalHours = parseInt(formData.interval) / 60;
+      diffHours = diffHours - intervalHours;
+    }
+
+    return Math.max(0, Math.round(diffHours * 100) / 100);
   };
 
   const handleSave = async () => {
     setLoading(true);
     try {
       const totalHours = calculateTotalHours();
-      
+
       await createOSMutation.mutateAsync({
         osNumber: formData.osNumber,
+        clientId: selectedClientId ? parseInt(selectedClientId) : undefined,
         clientName: formData.clientName,
         clientEmail: formData.clientEmail,
         serviceType: formData.serviceType,
@@ -83,7 +131,7 @@ export default function ServiceOrderForm() {
 
       toast.success("Ordem de Serviço salva com sucesso!");
       setFormData({
-        osNumber: "",
+        osNumber: nextOSNumber || "",
         clientName: "",
         clientEmail: "",
         serviceType: "",
@@ -92,6 +140,7 @@ export default function ServiceOrderForm() {
         endDateTime: "",
         description: "",
       });
+      setSelectedClientId("");
     } catch (error) {
       toast.error("Erro ao salvar a Ordem de Serviço");
       console.error(error);
@@ -104,9 +153,10 @@ export default function ServiceOrderForm() {
     setLoading(true);
     try {
       const totalHours = calculateTotalHours();
-      
+
       const result = await createOSMutation.mutateAsync({
         osNumber: formData.osNumber,
+        clientId: selectedClientId ? parseInt(selectedClientId) : undefined,
         clientName: formData.clientName,
         clientEmail: formData.clientEmail,
         serviceType: formData.serviceType,
@@ -120,7 +170,7 @@ export default function ServiceOrderForm() {
       // TODO: Integrar envio de e-mail
       toast.success("Ordem de Serviço enviada com sucesso!");
       setFormData({
-        osNumber: "",
+        osNumber: nextOSNumber || "",
         clientName: "",
         clientEmail: "",
         serviceType: "",
@@ -129,6 +179,7 @@ export default function ServiceOrderForm() {
         endDateTime: "",
         description: "",
       });
+      setSelectedClientId("");
       setLocation("/partners/service-orders");
     } catch (error) {
       toast.error("Erro ao enviar a Ordem de Serviço");
@@ -149,56 +200,77 @@ export default function ServiceOrderForm() {
             <p className="text-red-100 mt-2">Preencha os dados da ordem de serviço abaixo</p>
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
-            {/* Número da OS */}
+            {/* Número da OS - Automático */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Número da OS *
-              </label>
+              <Label className="block text-sm font-medium text-foreground mb-2">
+                Número da OS (Automático)
+              </Label>
               <Input
                 type="text"
                 name="osNumber"
                 value={formData.osNumber}
-                onChange={handleInputChange}
-                placeholder="Ex: OS-2024-001"
-                required
+                disabled
+                className="bg-gray-100 dark:bg-gray-900"
+                placeholder="Será gerado automaticamente"
               />
             </div>
 
-            {/* Cliente */}
+            {/* Seleção de Cliente */}
+            <div>
+              <Label className="block text-sm font-medium text-foreground mb-2">
+                Selecionar Cliente *
+              </Label>
+              <Select value={selectedClientId} onValueChange={handleClientSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Escolha um cliente cadastrado" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients?.map((client) => (
+                    <SelectItem key={client.id} value={client.id.toString()}>
+                      {client.name} ({client.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Cliente - Informações */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <Label className="block text-sm font-medium text-foreground mb-2">
                   Nome do Cliente *
-                </label>
+                </Label>
                 <Input
                   type="text"
                   name="clientName"
                   value={formData.clientName}
                   onChange={handleInputChange}
-                  placeholder="Ex: Empresa XYZ"
-                  required
+                  placeholder="Preenchido automaticamente"
+                  disabled
+                  className="bg-gray-100 dark:bg-gray-900"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <Label className="block text-sm font-medium text-foreground mb-2">
                   E-mail do Cliente *
-                </label>
+                </Label>
                 <Input
                   type="email"
                   name="clientEmail"
                   value={formData.clientEmail}
                   onChange={handleInputChange}
-                  placeholder="cliente@empresa.com"
-                  required
+                  placeholder="Preenchido automaticamente"
+                  disabled
+                  className="bg-gray-100 dark:bg-gray-900"
                 />
               </div>
             </div>
 
             {/* Tipo de Serviço */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <Label className="block text-sm font-medium text-foreground mb-2">
                 Tipo de Serviço *
-              </label>
+              </Label>
               <Input
                 type="text"
                 name="serviceType"
@@ -212,9 +284,9 @@ export default function ServiceOrderForm() {
             {/* Data e Hora de Início */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <Label className="block text-sm font-medium text-foreground mb-2">
                   Data e Hora de Início *
-                </label>
+                </Label>
                 <Input
                   type="datetime-local"
                   name="startDateTime"
@@ -224,44 +296,45 @@ export default function ServiceOrderForm() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <Label className="block text-sm font-medium text-foreground mb-2">
                   Intervalo (minutos)
-                </label>
+                </Label>
                 <Input
                   type="number"
                   name="interval"
                   value={formData.interval}
                   onChange={handleInputChange}
-                  placeholder="Ex: 60"
+                  placeholder="Ex: 60 (será descontado do total)"
                 />
               </div>
             </div>
 
             {/* Data e Hora de Término */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Data e Hora de Término
-              </label>
+              <Label className="block text-sm font-medium text-foreground mb-2">
+                Data e Hora de Término *
+              </Label>
               <Input
                 type="datetime-local"
                 name="endDateTime"
                 value={formData.endDateTime}
                 onChange={handleInputChange}
+                required
               />
             </div>
 
             {/* Total de Horas (Calculado) */}
             <div className="bg-red-50 dark:bg-red-950 p-4 rounded-lg border border-red-200 dark:border-red-800">
               <p className="text-sm font-medium text-foreground">
-                Total de Horas (Calculado): <span className="text-lg font-bold text-red-600">{totalHours} horas</span>
+                Total de Horas (Calculado com desconto de intervalo): <span className="text-lg font-bold text-red-600">{totalHours} horas</span>
               </p>
             </div>
 
             {/* Descrição do Serviço */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <Label className="block text-sm font-medium text-foreground mb-2">
                 Descrição do Serviço
-              </label>
+              </Label>
               <Textarea
                 name="description"
                 value={formData.description}
@@ -275,7 +348,7 @@ export default function ServiceOrderForm() {
             <div className="flex gap-4 pt-6">
               <Button
                 onClick={handleSave}
-                disabled={loading || !formData.osNumber || !formData.clientName || !formData.clientEmail || !formData.serviceType || !formData.startDateTime}
+                disabled={loading || !formData.clientName || !formData.clientEmail || !formData.serviceType || !formData.startDateTime || !formData.endDateTime}
                 variant="outline"
                 className="flex-1"
               >
@@ -283,7 +356,7 @@ export default function ServiceOrderForm() {
               </Button>
               <Button
                 onClick={handleSend}
-                disabled={loading || !formData.osNumber || !formData.clientName || !formData.clientEmail || !formData.serviceType || !formData.startDateTime}
+                disabled={loading || !formData.clientName || !formData.clientEmail || !formData.serviceType || !formData.startDateTime || !formData.endDateTime}
                 className="flex-1 bg-red-600 hover:bg-red-700"
               >
                 {loading ? "Enviando..." : "Enviar para Cliente"}
