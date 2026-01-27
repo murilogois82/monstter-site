@@ -193,3 +193,59 @@
     background-size: 20px 20px;
   }
 }
+
+/* React Big Calendar Customization */
+@layer components {
+  .rbc-calendar {
+    @apply bg-background text-foreground;
+  }
+
+  .rbc-header {
+    @apply bg-gray-100 dark:bg-gray-800 text-foreground font-semibold py-2;
+  }
+
+  .rbc-today {
+    @apply bg-red-50 dark:bg-red-950;
+  }
+
+  .rbc-off-range-bg {
+    @apply bg-gray-50 dark:bg-gray-900;
+  }
+
+  .rbc-event {
+    @apply rounded px-1 py-0.5 text-xs font-medium;
+  }
+
+  .rbc-event-label {
+    @apply text-xs;
+  }
+
+  .rbc-toolbar {
+    @apply flex flex-wrap gap-2 mb-4 justify-between;
+  }
+
+  .rbc-toolbar button {
+    @apply px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-foreground hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium;
+  }
+
+  .rbc-toolbar button.rbc-active {
+    @apply bg-red-500 text-white border-red-500 hover:bg-red-600;
+  }
+
+  .rbc-month-view,
+  .rbc-time-view {
+    @apply border border-gray-200 dark:border-gray-700 rounded;
+  }
+
+  .rbc-date-cell {
+    @apply p-1;
+  }
+
+  .rbc-day-bg {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+
+  .rbc-time-slot {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+}

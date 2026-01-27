@@ -63,3 +63,11 @@
 - [x] Implementar lógica de acesso ao painel de parceiros
 - [x] Criar dashboard de parceiros
 - [x] Testar fluxo completo de login e acesso
+
+## Visualização de Calendário no Painel de Parceiros
+
+- [x] Instalar biblioteca de calendário (react-big-calendar ou similar)
+- [x] Criar componente de calendário com eventos
+- [x] Integrar calendário ao PartnerDashboard
+- [x] Adicionar interatividade para visualizar detalhes das ordens
+- [x] Testar visualização de calendário

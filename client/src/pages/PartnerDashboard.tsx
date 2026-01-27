@@ -3,6 +3,7 @@ import Layout from "@/components/Layout";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import ServiceOrderCalendar from "@/components/ServiceOrderCalendar";
 import {
   Table,
   TableBody,
@@ -69,6 +70,21 @@ export default function PartnerDashboard() {
   const totalOrders = serviceOrders?.length || 0;
   const totalPayments = payments?.reduce((sum: number, p: any) => sum + (parseFloat(p.amount || "0")), 0) || 0;
   const totalHours = serviceOrders?.reduce((sum: number, o: any) => sum + (o.totalHours || 0), 0) || 0;
+
+  // Prepare calendar events
+  const calendarEvents = serviceOrders?.map((order: any) => ({
+    id: order.id,
+    title: `${order.osNumber} - ${order.clientName}`,
+    start: order.startDateTime ? new Date(order.startDateTime) : new Date(),
+    end: order.endDateTime ? new Date(order.endDateTime) : new Date(new Date().getTime() + 3600000),
+    resource: {
+      osNumber: order.osNumber,
+      clientName: order.clientName,
+      serviceType: order.serviceType,
+      totalHours: order.totalHours || 0,
+      status: order.status,
+    },
+  })) || [];
 
   return (
     <Layout>
@@ -145,6 +161,11 @@ export default function PartnerDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Calendar */}
+        {!ordersLoading && calendarEvents.length > 0 && (
+          <ServiceOrderCalendar events={calendarEvents} />
+        )}
 
         {/* Service Orders Table */}
         <Card className="mb-8">
