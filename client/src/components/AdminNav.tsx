@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, FileText, Users, DollarSign, UserCheck } from "lucide-react";
+import { LayoutDashboard, FileText, Users, DollarSign, UserCheck, Briefcase } from "lucide-react";
 
 export default function AdminNav() {
   const [location] = useLocation();
@@ -29,6 +29,12 @@ export default function AdminNav() {
       path: "/admin/clients",
       icon: UserCheck,
       description: "Cadastro de clientes"
+    },
+    { 
+      label: "Parceiros", 
+      path: "/admin/partners",
+      icon: Briefcase,
+      description: "Cadastro de parceiros"
     },
   ];
 

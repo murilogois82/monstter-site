@@ -46,3 +46,10 @@
 - [x] Implementar job de envio automático de relatórios
 - [x] Criar interface de configuração de agendamentos
 - [x] Testar envio automático de relatórios
+
+## Correções e Melhorias Solicitadas
+
+- [x] Adicionar opção de cadastro de parceiros no painel administrativo
+- [x] Corrigir exibição dos campos de pagamento no cadastro de clientes
+- [x] Corrigir preenchimento automático de nome e email do cliente ao criar OS
+- [x] Testar todas as correções

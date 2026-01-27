@@ -53,6 +53,8 @@ export default function ClientManagement() {
     city: "",
     state: "",
     zipCode: "",
+    paymentType: "hourly" as "fixed" | "hourly",
+    paymentValue: "",
     notes: "",
   });
 
@@ -127,6 +129,8 @@ export default function ClientManagement() {
         city: "",
         state: "",
         zipCode: "",
+        paymentType: "hourly",
+        paymentValue: "",
         notes: "",
       });
       setIsCreateDialogOpen(false);
@@ -285,6 +289,32 @@ export default function ClientManagement() {
                           value={newClient.address}
                           onChange={(e) => setNewClient({ ...newClient, address: e.target.value })}
                           placeholder="Rua, número, complemento"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="paymentType">Tipo de Pagamento</Label>
+                        <Select 
+                          value={newClient.paymentType}
+                          onValueChange={(value) => setNewClient({ ...newClient, paymentType: value as "fixed" | "hourly" })}
+                        >
+                          <SelectTrigger id="paymentType">
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="hourly">Por Hora</SelectItem>
+                            <SelectItem value="fixed">Valor Fixo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="paymentValue">Valor de Pagamento</Label>
+                        <Input
+                          id="paymentValue"
+                          type="number"
+                          step="0.01"
+                          value={newClient.paymentValue}
+                          onChange={(e) => setNewClient({ ...newClient, paymentValue: e.target.value })}
+                          placeholder="0.00"
                         />
                       </div>
                       <div className="space-y-2 md:col-span-2">
@@ -487,6 +517,32 @@ export default function ClientManagement() {
                     id="edit-address"
                     value={selectedClient.address || ""}
                     onChange={(e) => setSelectedClient({ ...selectedClient, address: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-paymentType">Tipo de Pagamento</Label>
+                  <Select 
+                    value={selectedClient.paymentType || "hourly"}
+                    onValueChange={(value) => setSelectedClient({ ...selectedClient, paymentType: value })}
+                  >
+                    <SelectTrigger id="edit-paymentType">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hourly">Por Hora</SelectItem>
+                      <SelectItem value="fixed">Valor Fixo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-paymentValue">Valor de Pagamento</Label>
+                  <Input
+                    id="edit-paymentValue"
+                    type="number"
+                    step="0.01"
+                    value={selectedClient.paymentValue || ""}
+                    onChange={(e) => setSelectedClient({ ...selectedClient, paymentValue: e.target.value })}
+                    placeholder="0.00"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">

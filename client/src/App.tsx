@@ -14,6 +14,7 @@ import AdminServiceOrders from "./pages/AdminServiceOrders";
 import PaymentsDashboard from "./pages/PaymentsDashboard";
 import UserManagement from "./pages/UserManagement";
 import ClientManagement from "./pages/ClientManagement";
+import PartnerManagement from "./pages/PartnerManagement";
 import FinancialDashboard from "./pages/FinancialDashboard";
 
 function Router() {
@@ -30,6 +31,7 @@ function Router() {
       <Route path={"/admin/payments-dashboard"} component={PaymentsDashboard} />
       <Route path={"/admin/users"} component={UserManagement} />
       <Route path={"/admin/clients"} component={ClientManagement} />
+      <Route path={"/admin/partners"} component={PartnerManagement} />
       <Route path={"/admin/financial"} component={FinancialDashboard} />
       <Route path={"/admin"} component={AdminServiceOrders} />
       <Route path={"/404"} component={NotFound} />

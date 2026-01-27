@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners, getAllUsers, getUserById, updateUserRole, createUser, getDb } from "./db";
+import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners, updatePartner, deletePartner, getAllUsers, getUserById, updateUserRole, createUser, getDb } from "./db";
 import { clientRouter } from "./clients";
 import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
 import { generateClientServiceReport, generatePartnerPaymentReport, getClientsWithOrdersInPeriod } from "./serviceReports";
@@ -289,11 +289,105 @@ export const appRouter = router({
 
     // List all partners (admin only)
     listAll: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
+      if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
         throw new Error("Acesso negado");
       }
       return await getAllPartners();
     }),
+
+    // Create a new partner
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(2),
+        email: z.string().email(),
+        phone: z.string().optional(),
+        cpf: z.string().optional(),
+        bankName: z.string().optional(),
+        bankAccount: z.string().optional(),
+        bankRoutingNumber: z.string().optional(),
+        paymentType: z.enum(["fixed", "hourly"]),
+        paymentValue: z.number().min(0),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+
+        const result = await createPartner({
+          userId: ctx.user.id,
+          companyName: input.name,
+          email: input.email,
+          phone: input.phone || null,
+          paymentType: input.paymentType,
+          paidValue: input.paymentValue.toString(),
+          status: "active",
+        });
+
+        if (!result) {
+          throw new Error("Falha ao criar parceiro");
+        }
+
+        return { success: true, id: result.id };
+      }),
+
+    // Update a partner
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(2).optional(),
+        email: z.string().email().optional(),
+        phone: z.string().optional(),
+        cpf: z.string().optional(),
+        bankName: z.string().optional(),
+        bankAccount: z.string().optional(),
+        bankRoutingNumber: z.string().optional(),
+        paymentType: z.enum(["fixed", "hourly"]).optional(),
+        paymentValue: z.number().min(0).optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+
+        const updateData: any = {};
+        if (input.name) updateData.name = input.name;
+        if (input.email) updateData.email = input.email;
+        if (input.phone !== undefined) updateData.phone = input.phone || null;
+        if (input.cpf !== undefined) updateData.cpf = input.cpf || null;
+        if (input.bankName !== undefined) updateData.bankName = input.bankName || null;
+        if (input.bankAccount !== undefined) updateData.bankAccount = input.bankAccount || null;
+        if (input.bankRoutingNumber !== undefined) updateData.bankRoutingNumber = input.bankRoutingNumber || null;
+        if (input.paymentType) updateData.paymentType = input.paymentType;
+        if (input.paymentValue !== undefined) updateData.paymentValue = input.paymentValue.toString();
+        if (input.notes !== undefined) updateData.notes = input.notes || null;
+
+        const result = await updatePartner(input.id, updateData);
+
+        if (!result) {
+          throw new Error("Falha ao atualizar parceiro");
+        }
+
+        return { success: true };
+      }),
+
+    // Delete (inactivate) a partner
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+
+        const result = await deletePartner(input.id);
+
+        if (!result) {
+          throw new Error("Falha ao inativar parceiro");
+        }
+
+        return { success: true };
+      }),
   }),
 
   // Clients Router (Admin/Manager only)

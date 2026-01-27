@@ -246,7 +246,6 @@ export default function ServiceOrderForm() {
                   value={formData.clientName}
                   onChange={handleInputChange}
                   placeholder="Preenchido automaticamente"
-                  disabled
                   className="bg-gray-100 dark:bg-gray-900"
                 />
               </div>
@@ -260,7 +259,6 @@ export default function ServiceOrderForm() {
                   value={formData.clientEmail}
                   onChange={handleInputChange}
                   placeholder="Preenchido automaticamente"
-                  disabled
                   className="bg-gray-100 dark:bg-gray-900"
                 />
               </div>

@@ -420,3 +420,36 @@ export async function getAllPartners(): Promise<Partner[]> {
     throw error;
   }
 }
+
+export async function updatePartner(id: number, partnerData: Partial<InsertPartner>): Promise<Partner | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update partner: database not available");
+    return null;
+  }
+
+  try {
+    await db.update(partners).set(partnerData).where(eq(partners.id, id));
+    const [updated] = await db.select().from(partners).where(eq(partners.id, id)).limit(1);
+    return updated || null;
+  } catch (error) {
+    console.error("[Database] Failed to update partner:", error);
+    throw error;
+  }
+}
+
+export async function deletePartner(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot delete partner: database not available");
+    return false;
+  }
+
+  try {
+    await db.update(partners).set({ status: "inactive" }).where(eq(partners.id, id));
+    return true;
+  } catch (error) {
+    console.error("[Database] Failed to delete partner:", error);
+    throw error;
+  }
+}
