@@ -188,6 +188,26 @@ export const appRouter = router({
         return await getServiceOrdersByStatus(input);
       }),
 
+    // Get service orders by partner ID
+    getByPartnerId: protectedProcedure
+      .input(z.number())
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager" && ctx.user.role !== "partner") {
+          throw new Error("Acesso negado");
+        }
+        return await getServiceOrdersByPartnerId(input);
+      }),
+
+    // Get payments by partner ID
+    getPaymentsByPartnerId: protectedProcedure
+      .input(z.number())
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager" && ctx.user.role !== "partner") {
+          throw new Error("Acesso negado");
+        }
+        return await getPaymentsByPartnerId(input);
+      }),
+
     // Send a service order (change status to sent)
     send: protectedProcedure
       .input(z.number())
@@ -384,6 +404,28 @@ export const appRouter = router({
 
         if (!result) {
           throw new Error("Falha ao inativar parceiro");
+        }
+
+        return { success: true };
+      }),
+
+    // Associate a user to a partner
+    associateUser: protectedProcedure
+      .input(z.object({
+        partnerId: z.number(),
+        userId: z.number().nullable(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+
+        const result = await updatePartner(input.partnerId, {
+          userId: input.userId || undefined,
+        });
+
+        if (!result) {
+          throw new Error("Falha ao associar usuário ao parceiro");
         }
 
         return { success: true };

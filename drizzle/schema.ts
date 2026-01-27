@@ -133,9 +133,20 @@ export type InsertOSPayment = typeof osPayments.$inferInsert;
 /**
  * Relações entre tabelas
  */
-export const partnersRelations = relations(partners, ({ many }) => ({
+export const partnersRelations = relations(partners, ({ many, one }) => ({
+  user: one(users, {
+    fields: [partners.userId],
+    references: [users.id],
+  }),
   serviceOrders: many(serviceOrders),
   payments: many(osPayments),
+}));
+
+export const usersRelations = relations(users, ({ one }) => ({
+  partner: one(partners, {
+    fields: [users.id],
+    references: [partners.userId],
+  }),
 }));
 
 export const serviceOrdersRelations = relations(serviceOrders, ({ one, many }) => ({

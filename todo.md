@@ -53,3 +53,13 @@
 - [x] Corrigir exibição dos campos de pagamento no cadastro de clientes
 - [x] Corrigir preenchimento automático de nome e email do cliente ao criar OS
 - [x] Testar todas as correções
+
+## Associação de Usuários a Parceiros
+
+- [x] Adicionar campo userId na tabela de parceiros
+- [x] Criar migração do banco de dados
+- [x] Implementar interface de associação de usuários a parceiros
+- [x] Criar API para associar/desassociar usuários a parceiros
+- [x] Implementar lógica de acesso ao painel de parceiros
+- [x] Criar dashboard de parceiros
+- [x] Testar fluxo completo de login e acesso
