@@ -272,6 +272,37 @@ export async function notifyManagerOSSent(
 }
 
 /**
+ * Enviar e-mail genérico
+ */
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  text,
+}: {
+  to: string;
+  subject: string;
+  html?: string;
+  text?: string;
+}): Promise<boolean> {
+  try {
+    await transporter.sendMail({
+      from: '"Monstter Consultoria" <atendimento@monstter.com.br>',
+      to,
+      subject,
+      html,
+      text,
+    });
+
+    console.log("[Email] E-mail enviado para:", to);
+    return true;
+  } catch (error) {
+    console.error("[Email] Erro ao enviar e-mail:", error);
+    return false;
+  }
+}
+
+/**
  * Verificar conexão SMTP
  */
 export async function verifyEmailConnection(): Promise<boolean> {

@@ -157,6 +157,28 @@ export const osPaymentsRelations = relations(osPayments, ({ one }) => ({
   }),
 }));
 
+/**
+ * Tabela para armazenar agendamentos de envio de relatórios financeiros.
+ */
+export const reportSchedules = mysqlTable("report_schedules", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  recipientEmail: varchar("recipientEmail", { length: 320 }).notNull(),
+  frequency: mysqlEnum("frequency", ["daily", "weekly", "biweekly", "monthly"]).default("monthly").notNull(),
+  dayOfWeek: int("dayOfWeek"), // 0-6 para weekly
+  dayOfMonth: int("dayOfMonth"), // 1-31 para monthly
+  time: varchar("time", { length: 5 }), // HH:mm
+  reportType: mysqlEnum("reportType", ["financial", "service_orders", "payments", "all"]).default("financial").notNull(),
+  includeCharts: mysqlEnum("includeCharts", ["yes", "no"]).default("yes").notNull(),
+  status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
+  lastSentAt: datetime("lastSentAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ReportSchedule = typeof reportSchedules.$inferSelect;
+export type InsertReportSchedule = typeof reportSchedules.$inferInsert;
+
 export const clientsRelations = relations(clients, ({ many }) => ({
   serviceOrders: many(serviceOrders),
 }));

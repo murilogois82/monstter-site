@@ -2,12 +2,14 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners, getAllUsers, getUserById, updateUserRole, createUser } from "./db";
+import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners, getAllUsers, getUserById, updateUserRole, createUser, getDb } from "./db";
 import { clientRouter } from "./clients";
 import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
 import { generateClientServiceReport, generatePartnerPaymentReport, getClientsWithOrdersInPeriod } from "./serviceReports";
 import { calculateFinancialMetrics, getMonthlyComparison, getConsultantMetrics, getUtilizationRate } from "./financialMetrics";
 import { z } from "zod";
+import { reportSchedules } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -453,6 +455,98 @@ export const appRouter = router({
           throw new Error("Acesso negado");
         }
         return await getUtilizationRate(input.periodStart, input.periodEnd);
+      }),
+  }),
+
+  // Report Scheduling Router
+  reportSchedules: router({
+    // Criar novo agendamento de relatório
+    create: protectedProcedure
+      .input(z.object({
+        recipientEmail: z.string().email(),
+        frequency: z.enum(["daily", "weekly", "biweekly", "monthly"]),
+        dayOfWeek: z.number().optional(),
+        dayOfMonth: z.number().optional(),
+        time: z.string().regex(/^\d{2}:\d{2}$/),
+        reportType: z.enum(["financial", "service_orders", "payments", "all"]),
+        includeCharts: z.enum(["yes", "no"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.insert(reportSchedules).values({
+          userId: ctx.user.id,
+          recipientEmail: input.recipientEmail,
+          frequency: input.frequency,
+          dayOfWeek: input.dayOfWeek,
+          dayOfMonth: input.dayOfMonth,
+          time: input.time,
+          reportType: input.reportType,
+          includeCharts: input.includeCharts,
+        });
+        
+        return { success: true };
+      }),
+
+    // Listar agendamentos do usuário
+    list: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        return await db.select().from(reportSchedules).where(eq(reportSchedules.userId, ctx.user.id));
+      }),
+
+    // Atualizar agendamento
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(["active", "inactive"]).optional(),
+        time: z.string().optional(),
+        frequency: z.enum(["daily", "weekly", "biweekly", "monthly"]).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.update(reportSchedules)
+          .set({
+            status: input.status,
+            time: input.time,
+            frequency: input.frequency,
+          })
+          .where(eq(reportSchedules.id, input.id));
+        
+        return { success: true };
+      }),
+
+    // Deletar agendamento
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.delete(reportSchedules).where(eq(reportSchedules.id, input.id));
+        
+        return { success: true };
       }),
   }),
 });

@@ -37,3 +37,12 @@
 - [x] Criar página de dashboard com gráficos (receita, margem, horas faturáveis)
 - [x] Implementar comparativo mensal e filtros por período
 - [x] Testar dashboard financeiro
+
+## Campos de Pagamento e Tabela de Parceiros
+
+- [x] Adicionar campos de tipo de pagamento e valor no cadastro de clientes
+- [x] Criar tabela de parceiros (consultores) com dados de identificação e pagamento
+- [x] Criar APIs para agendamento de relatórios financeiros
+- [x] Implementar job de envio automático de relatórios
+- [x] Criar interface de configuração de agendamentos
+- [x] Testar envio automático de relatórios
