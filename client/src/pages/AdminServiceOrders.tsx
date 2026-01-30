@@ -47,6 +47,10 @@ export default function AdminServiceOrders() {
     enabled: isAuthenticated && (user?.role === "admin" || user?.role === "manager"),
   });
 
+  const { data: allPartners = [] } = trpc.partner.listAll.useQuery(undefined, {
+    enabled: isAuthenticated && (user?.role === "admin" || user?.role === "manager"),
+  });
+
   const closeOSMutation = trpc.serviceOrder.close.useMutation();
 
   if (!isAuthenticated || (user?.role !== "admin" && user?.role !== "manager")) {
@@ -217,7 +221,30 @@ export default function AdminServiceOrders() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => setPaymentData({ ...paymentData, osId: order.id })}
+                                onClick={() => {
+                                  // Find the partner for this order
+                                  const partner = allPartners.find(p => p.id === order.partnerId);
+                                  let calculatedAmount = 0;
+                                  
+                                  if (partner && order.totalHours) {
+                                    const partnerValue = parseFloat(partner.paidValue || "0");
+                                    const totalHours = parseFloat(order.totalHours.toString() || "0");
+                                    
+                                    if (partner.paymentType === "hourly") {
+                                      calculatedAmount = partnerValue * totalHours;
+                                    } else {
+                                      calculatedAmount = partnerValue;
+                                    }
+                                  }
+                                  
+                                  setPaymentData({
+                                    osId: order.id,
+                                    amount: calculatedAmount.toFixed(2),
+                                    paymentStatus: "pending" as const,
+                                    paymentDate: "",
+                                    notes: "",
+                                  });
+                                }}
                                 disabled={order.status === "closed"}
                               >
                                 Encerrar

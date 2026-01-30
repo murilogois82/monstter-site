@@ -157,3 +157,14 @@
 - [x] Adicionar rota listPending na API de pagamentos
 - [ ] Testar exibição de valores em todos os locais
 - [ ] Integrar pagamentos pendentes no dashboard financeiro
+
+## Correção de Cálculo de Valor no Encerramento da OS
+
+- [x] Investigar como o diálogo de encerramento da OS é aberto
+- [x] Implementar cálculo de valor no frontend ao abrir o diálogo
+- [x] Buscar dados do parceiro e horas trabalhadas
+- [x] Calcular valor baseado no tipo de pagamento (fixo/hora)
+- [x] Preencher automaticamente o campo de valor no formulário
+- [x] Testar cálculo com diferentes tipos de pagamento
+- [x] Adicionar query de parceiros no AdminServiceOrders
+- [x] Resetar formulário ao abrir diálogo
