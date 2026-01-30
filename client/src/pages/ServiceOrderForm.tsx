@@ -270,14 +270,9 @@ export default function ServiceOrderForm() {
               <Label className="block text-sm font-medium text-foreground mb-2">
                 Número da OS (Automático)
               </Label>
-              <Input
-                type="text"
-                name="osNumber"
-                value={formData.osNumber}
-                disabled
-                className="bg-gray-100 dark:bg-gray-900"
-                placeholder="Será gerado automaticamente"
-              />
+              <div className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-2 text-foreground font-semibold">
+                {formData.osNumber || "Carregando..."}
+              </div>
             </div>
 
             {/* Seleção de Cliente */}

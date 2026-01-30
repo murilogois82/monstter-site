@@ -85,3 +85,10 @@
 - [x] Verificar a API getNextOSNumber
 - [x] Corrigir o preenchimento do osNumber no formulário
 - [x] Testar criação de OS com número automático
+
+## Correção de Visibilidade do Campo de Número da OS
+
+- [x] Investigar por que o campo osNumber está invisível
+- [x] Verificar o CSS e renderização
+- [x] Corrigir a visibilidade e preenchimento
+- [x] Testar gravação do osNumber
