@@ -21,6 +21,8 @@ export const clientRouter = router({
         city: z.string().optional(),
         state: z.string().max(2).optional(),
         zipCode: z.string().optional(),
+        paymentType: z.enum(["fixed", "hourly"]).optional(),
+        paymentValue: z.string().optional(),
         notes: z.string().optional(),
       })
     )
@@ -51,6 +53,8 @@ export const clientRouter = router({
         city: input.city,
         state: input.state,
         zipCode: input.zipCode,
+        paymentType: input.paymentType || "hourly",
+        chargedValue: input.paymentValue ? input.paymentValue : null,
         notes: input.notes,
         status: "active",
       });
@@ -131,6 +135,8 @@ export const clientRouter = router({
         city: z.string().optional(),
         state: z.string().max(2).optional(),
         zipCode: z.string().optional(),
+        paymentType: z.enum(["fixed", "hourly"]).optional(),
+        paymentValue: z.string().optional(),
         status: z.enum(["active", "inactive"]).optional(),
         notes: z.string().optional(),
       })
@@ -151,9 +157,20 @@ export const clientRouter = router({
         });
       }
 
-      const { id, ...updateData } = input;
+      const { id, cnpj, paymentValue, ...updateData } = input;
+      
+      const finalUpdateData: any = {
+        ...updateData,
+        document: cnpj,
+        chargedValue: paymentValue || null,
+      };
+      
+      // Remove undefined values
+      Object.keys(finalUpdateData).forEach(key => 
+        finalUpdateData[key] === undefined && delete finalUpdateData[key]
+      );
 
-      await db.update(clients).set(updateData).where(eq(clients.id, id));
+      await db.update(clients).set(finalUpdateData).where(eq(clients.id, id));
 
       return { success: true };
     }),

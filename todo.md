@@ -99,3 +99,10 @@
 - [x] Permitir que usuário insira ou edite o número
 - [x] Manter sugestão automática como placeholder
 - [x] Testar salvamento com número editável
+
+## Correção de Gravação de Campos de Valor
+
+- [x] Investigar campos de valor no cadastro de clientes
+- [x] Investigar campos de valor no cadastro de parceiros
+- [x] Corrigir APIs de criação/atualização
+- [x] Testar gravação de valores
