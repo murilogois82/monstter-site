@@ -369,6 +369,21 @@ export async function getPaymentsByPartnerId(partnerId: number): Promise<OSPayme
   }
 }
 
+export async function getPendingPayments(): Promise<OSPayment[]> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get pending payments: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select().from(osPayments).where(eq(osPayments.paymentStatus, "pending")).orderBy(desc(osPayments.createdAt));
+  } catch (error) {
+    console.error("[Database] Failed to get pending payments:", error);
+    throw error;
+  }
+}
+
 // ===== Partners =====
 
 export async function createPartner(partner: InsertPartner): Promise<Partner | null> {

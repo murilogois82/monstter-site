@@ -144,3 +144,16 @@
 - [x] Mapear paidValue para paymentValue no formulário
 - [x] Adicionar validação de campos obrigatórios na API
 - [x] Adicionar valores padrão (null coalescing) para campos opcionais
+
+## Correção de Exibição de Valores de Parceiros
+
+- [x] Investigar por que o valor não aparece na grid de parceiros
+- [x] Verificar se o valor está sendo gravado corretamente no banco
+- [x] Corrigir a exibição do valor na tabela de parceiros (usar paidValue em vez de paymentValue)
+- [x] Investigar cálculo de pagamento ao encerrar OS
+- [x] Implementar cálculo de valor do pagamento baseado no tipo (fixo/hora)
+- [x] Investigar exibição de pagamentos pendentes no dashboard financeiro
+- [x] Criar função getPendingPayments no db.ts
+- [x] Adicionar rota listPending na API de pagamentos
+- [ ] Testar exibição de valores em todos os locais
+- [ ] Integrar pagamentos pendentes no dashboard financeiro

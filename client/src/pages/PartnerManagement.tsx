@@ -374,7 +374,7 @@ export default function PartnerManagement() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {partner.paymentValue ? `R$ ${partner.paymentValue.toFixed(2)}` : "-"}
+                            {partner.paidValue ? `R$ ${parseFloat(partner.paidValue).toFixed(2)}` : "-"}
                           </TableCell>
                           <TableCell>
                             <Badge variant={partner.status === "active" ? "default" : "secondary"}>

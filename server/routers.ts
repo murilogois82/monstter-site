@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, createPartner, getPartnerByUserId, getAllPartners, updatePartner, deletePartner, getAllUsers, getUserById, updateUserRole, createUser, getDb } from "./db";
+import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, getPendingPayments, createPartner, getPartnerByUserId, getAllPartners, updatePartner, deletePartner, getAllUsers, getUserById, updateUserRole, createUser, getDb } from "./db";
 import { clientRouter } from "./clients";
 import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
 import { generateClientServiceReport, generatePartnerPaymentReport, getClientsWithOrdersInPeriod } from "./serviceReports";
@@ -301,12 +301,32 @@ export const appRouter = router({
         // Update order status to closed
         await updateServiceOrder(input.id, { status: "closed" });
 
-        // Add payment information if provided
-        if (input.paymentAmount) {
+        // Calculate payment amount if not provided
+        let paymentAmount = input.paymentAmount;
+        if (!paymentAmount) {
+          // Get partner information to determine payment type and value
+          const allPartners = await getAllPartners();
+          const partner = allPartners.find(p => p.id === order.partnerId);
+          if (partner) {
+            const partnerValue = parseFloat(partner.paidValue || "0");
+            const totalHours = parseFloat(order.totalHours?.toString() || "0");
+            
+            if (partner.paymentType === "hourly") {
+              // Calculate based on hourly rate
+              paymentAmount = partnerValue * totalHours;
+            } else {
+              // Fixed payment
+              paymentAmount = partnerValue;
+            }
+          }
+        }
+
+        // Add payment information
+        if (paymentAmount && paymentAmount > 0) {
           await createOSPayment({
             osId: input.id,
             partnerId: order.partnerId,
-            amount: String(input.paymentAmount),
+            amount: String(paymentAmount),
             paymentStatus: (input.paymentStatus || "pending") as any,
             paymentDate: input.paymentDate || null,
             notes: input.notes || null,
@@ -326,6 +346,14 @@ export const appRouter = router({
         return [];
       }
       return await getPaymentsByPartnerId(partner.id);
+    }),
+
+    // Get pending payments (admin/manager only)
+    listPending: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+        throw new Error("Acesso negado");
+      }
+      return await getPendingPayments();
     }),
 
     // Update payment status (admin/manager only)
