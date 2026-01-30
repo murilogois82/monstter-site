@@ -179,9 +179,16 @@ export default function ServiceOrderForm() {
         description: "",
       });
       setSelectedClientId("");
-    } catch (error) {
-      toast.error("Erro ao salvar a Ordem de Serviço");
-      console.error(error);
+    } catch (error: any) {
+      console.error("Erro ao salvar OS:", error);
+      
+      if (error.message?.includes("Duplicate") || error.message?.includes("UNIQUE")) {
+        toast.error("Este numero de OS ja existe. Use outro numero.");
+      } else if (error.message?.includes("email")) {
+        toast.error("E-mail invalido ou ja existe.");
+      } else {
+        toast.error(`Erro ao salvar: ${error.message || "Erro desconhecido"}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -246,9 +253,16 @@ export default function ServiceOrderForm() {
       });
       setSelectedClientId("");
       setLocation("/partners/service-orders");
-    } catch (error) {
-      toast.error("Erro ao enviar a Ordem de Serviço");
-      console.error(error);
+    } catch (error: any) {
+      console.error("Erro ao enviar OS:", error);
+      
+      if (error.message?.includes("Duplicate") || error.message?.includes("UNIQUE")) {
+        toast.error("Este numero de OS ja existe. Use outro numero.");
+      } else if (error.message?.includes("email")) {
+        toast.error("E-mail invalido ou ja existe.");
+      } else {
+        toast.error(`Erro ao enviar: ${error.message || "Erro desconhecido"}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -265,14 +279,19 @@ export default function ServiceOrderForm() {
             <p className="text-red-100 mt-2">Preencha os dados da ordem de serviço abaixo</p>
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
-            {/* Número da OS - Automático */}
+            {/* Número da OS - Editável */}
             <div>
               <Label className="block text-sm font-medium text-foreground mb-2">
-                Número da OS (Automático)
+                Número da OS *
               </Label>
-              <div className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-2 text-foreground font-semibold">
-                {formData.osNumber || "Carregando..."}
-              </div>
+              <Input
+                type="text"
+                name="osNumber"
+                value={formData.osNumber}
+                onChange={handleInputChange}
+                placeholder={nextOSNumber || "Ex: OS-2026-0001"}
+                className="font-semibold"
+              />
             </div>
 
             {/* Seleção de Cliente */}

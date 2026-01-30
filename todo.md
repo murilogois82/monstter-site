@@ -92,3 +92,10 @@
 - [x] Verificar o CSS e renderização
 - [x] Corrigir a visibilidade e preenchimento
 - [x] Testar gravação do osNumber
+
+## Correção de Campo Editável de Número da OS
+
+- [x] Converter campo de osNumber para Input editável
+- [x] Permitir que usuário insira ou edite o número
+- [x] Manter sugestão automática como placeholder
+- [x] Testar salvamento com número editável
