@@ -71,3 +71,10 @@
 - [x] Integrar calendário ao PartnerDashboard
 - [x] Adicionar interatividade para visualizar detalhes das ordens
 - [x] Testar visualização de calendário
+
+## Correção de Preenchimento de Cliente e E-mail na OS
+
+- [x] Investigar o formulário de criação de OS
+- [x] Verificar a API de clientes
+- [x] Corrigir preenchimento automático de cliente e e-mail
+- [x] Testar salvamento de OS com dados preenchidos

@@ -86,11 +86,14 @@ export default function ServiceOrderForm() {
     setSelectedClientId(clientId);
     const selectedClient = clients?.find((c) => c.id === parseInt(clientId));
     if (selectedClient) {
+      console.log("Cliente selecionado:", selectedClient);
       setFormData((prev) => ({
         ...prev,
-        clientName: selectedClient.name,
-        clientEmail: selectedClient.email,
+        clientName: selectedClient.name || "",
+        clientEmail: selectedClient.email || "",
       }));
+    } else {
+      console.warn("Cliente não encontrado para ID:", clientId);
     }
   };
 
@@ -114,6 +117,28 @@ export default function ServiceOrderForm() {
   const handleSave = async () => {
     setLoading(true);
     try {
+      // Validar campos obrigatórios
+      if (!formData.clientName.trim()) {
+        toast.error("Nome do cliente é obrigatório");
+        setLoading(false);
+        return;
+      }
+      if (!formData.clientEmail.trim()) {
+        toast.error("E-mail do cliente é obrigatório");
+        setLoading(false);
+        return;
+      }
+      if (!formData.serviceType.trim()) {
+        toast.error("Tipo de serviço é obrigatório");
+        setLoading(false);
+        return;
+      }
+      if (!formData.startDateTime) {
+        toast.error("Data e hora de início é obrigatória");
+        setLoading(false);
+        return;
+      }
+
       const totalHours = calculateTotalHours();
 
       await createOSMutation.mutateAsync({
@@ -152,6 +177,28 @@ export default function ServiceOrderForm() {
   const handleSend = async () => {
     setLoading(true);
     try {
+      // Validar campos obrigatórios
+      if (!formData.clientName.trim()) {
+        toast.error("Nome do cliente é obrigatório");
+        setLoading(false);
+        return;
+      }
+      if (!formData.clientEmail.trim()) {
+        toast.error("E-mail do cliente é obrigatório");
+        setLoading(false);
+        return;
+      }
+      if (!formData.serviceType.trim()) {
+        toast.error("Tipo de serviço é obrigatório");
+        setLoading(false);
+        return;
+      }
+      if (!formData.startDateTime) {
+        toast.error("Data e hora de início é obrigatória");
+        setLoading(false);
+        return;
+      }
+
       const totalHours = calculateTotalHours();
 
       const result = await createOSMutation.mutateAsync({
@@ -246,7 +293,6 @@ export default function ServiceOrderForm() {
                   value={formData.clientName}
                   onChange={handleInputChange}
                   placeholder="Preenchido automaticamente"
-                  className="bg-gray-100 dark:bg-gray-900"
                 />
               </div>
               <div>
@@ -259,7 +305,6 @@ export default function ServiceOrderForm() {
                   value={formData.clientEmail}
                   onChange={handleInputChange}
                   placeholder="Preenchido automaticamente"
-                  className="bg-gray-100 dark:bg-gray-900"
                 />
               </div>
             </div>
