@@ -33,6 +33,10 @@ export default function PaymentsDashboard() {
     enabled: isAuthenticated && user?.role === "admin",
   });
 
+  const { data: pendingPaymentsList = [], isLoading: pendingPaymentsLoading } = trpc.payment.listPending.useQuery(undefined, {
+    enabled: isAuthenticated && (user?.role === "admin" || user?.role === "manager"),
+  });
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -73,7 +77,7 @@ export default function PaymentsDashboard() {
     );
   }
 
-  if (ordersLoading || partnersLoading) {
+  if (ordersLoading || partnersLoading || pendingPaymentsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-foreground/70">Carregando dashboard...</p>
@@ -91,11 +95,10 @@ export default function PaymentsDashboard() {
   const hourlyRate = 150;
   const totalRevenue = totalHours * hourlyRate;
 
-  // Pagamentos pendentes (ordens concluídas mas não pagas)
-  const pendingPayments = orders?.filter((o) => o.status === "completed").length || 0;
-  const pendingRevenue = orders
-    ?.filter((o) => o.status === "completed")
-    .reduce((acc, order) => acc + (parseFloat(order.totalHours || "0") || 0) * hourlyRate, 0) || 0;
+  // Pagamentos pendentes (usando dados da tabela os_payments)
+  const pendingPayments = pendingPaymentsList?.length || 0;
+  const pendingRevenue = pendingPaymentsList
+    ?.reduce((acc, payment) => acc + parseFloat(payment.amount || "0"), 0) || 0;
 
   // Dados para gráfico de horas por consultor
   const partnerHoursMap = new Map<number, { name: string; hours: number }>();

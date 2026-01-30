@@ -168,3 +168,14 @@
 - [x] Testar cálculo com diferentes tipos de pagamento
 - [x] Adicionar query de parceiros no AdminServiceOrders
 - [x] Resetar formulário ao abrir diálogo
+
+## Correção de Cálculo de Pagamentos Pendentes no Dashboard
+
+- [x] Investigar como o dashboard busca pagamentos pendentes
+- [x] Verificar se a query payment.listPending está sendo chamada
+- [x] Corrigir cálculo do total de pagamentos pendentes
+- [x] Corrigir contagem de ordens pendentes
+- [x] Testar exibição de pagamentos pendentes no dashboard
+- [x] Adicionar query de pagamentos pendentes no PaymentsDashboard
+- [x] Usar dados reais da tabela os_payments em vez de cálculo baseado em horas
+- [x] Atualizar loading state para incluir pendingPaymentsLoading
