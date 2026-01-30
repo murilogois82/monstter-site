@@ -387,6 +387,10 @@ export const appRouter = router({
           companyName: input.name,
           email: input.email,
           phone: input.phone || null,
+          cpf: input.cpf || null,
+          bankName: input.bankName || null,
+          bankAccount: input.bankAccount || null,
+          bankRoutingNumber: input.bankRoutingNumber || null,
           paymentType: input.paymentType,
           paidValue: input.paymentValue.toString(),
           role: "partner",
@@ -424,6 +428,10 @@ export const appRouter = router({
         if (input.name) updateData.companyName = input.name;
         if (input.email) updateData.email = input.email;
         if (input.phone !== undefined) updateData.phone = input.phone || null;
+        if (input.cpf !== undefined) updateData.cpf = input.cpf || null;
+        if (input.bankName !== undefined) updateData.bankName = input.bankName || null;
+        if (input.bankAccount !== undefined) updateData.bankAccount = input.bankAccount || null;
+        if (input.bankRoutingNumber !== undefined) updateData.bankRoutingNumber = input.bankRoutingNumber || null;
         if (input.paymentType) updateData.paymentType = input.paymentType;
         if (input.paymentValue !== undefined) updateData.paidValue = input.paymentValue.toString();
         if (input.notes !== undefined) updateData.notes = input.notes || null;

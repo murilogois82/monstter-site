@@ -77,6 +77,10 @@ export const partners = mysqlTable("partners", {
   companyName: varchar("companyName", { length: 255 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
   phone: varchar("phone", { length: 30 }),
+  cpf: varchar("cpf", { length: 14 }),
+  bankName: varchar("bankName", { length: 100 }),
+  bankAccount: varchar("bankAccount", { length: 50 }),
+  bankRoutingNumber: varchar("bankRoutingNumber", { length: 20 }),
   paymentType: mysqlEnum("paymentType", ["fixed", "hourly"]).default("hourly").notNull(),
   paidValue: decimal("paidValue", { precision: 12, scale: 2 }), // Valor pago ao consultor
   role: mysqlEnum("role", ["partner", "manager", "admin"]).default("partner").notNull(),

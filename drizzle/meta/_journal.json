@@ -43,6 +43,13 @@
       "when": 1769487544035,
       "tag": "0005_lucky_rhodey",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1769810000842,
+      "tag": "0006_tricky_hellion",
+      "breakpoints": true
     }
   ]
 }

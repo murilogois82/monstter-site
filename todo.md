@@ -122,3 +122,14 @@
 - [x] Criar gráficos de desempenho
 - [x] Integrar painel ao PartnerDashboard
 - [x] Testar painel de controle
+
+## Correção de Gravação de Valor em Parceiros
+
+- [x] Investigar por que o valor não está sendo gravado
+- [x] Verificar a API de criação de parceiros
+- [x] Verificar a API de atualização de parceiros
+- [x] Corrigir o problema
+- [x] Testar gravação de valor
+- [x] Adicionar campos bancários (cpf, bankName, bankAccount, bankRoutingNumber) às APIs
+- [x] Criar testes unitários para validar gravação de campos bancários
+- [x] Corrigir erro de import duplicado no PartnerDashboard.tsx
