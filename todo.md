@@ -113,3 +113,12 @@
 - [x] Verificar função createPartner no db.ts
 - [x] Corrigir o problema
 - [x] Testar salvamento de parceiro
+
+## Painel de Controle para Parceiros
+
+- [x] Criar APIs de estatísticas de ordens de serviço
+- [x] Criar APIs de cálculo de receita
+- [x] Implementar componentes de cards de estatísticas
+- [x] Criar gráficos de desempenho
+- [x] Integrar painel ao PartnerDashboard
+- [x] Testar painel de controle

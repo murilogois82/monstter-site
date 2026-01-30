@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ServiceOrderCalendar from "@/components/ServiceOrderCalendar";
+import { PartnerControlPanel } from "@/components/PartnerControlPanel";
 import {
   Table,
   TableBody,
@@ -133,6 +134,11 @@ export default function PartnerDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Control Panel with Statistics */}
+        <div className="mb-8">
+          <PartnerControlPanel />
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

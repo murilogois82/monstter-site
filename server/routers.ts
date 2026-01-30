@@ -8,7 +8,7 @@ import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
 import { generateClientServiceReport, generatePartnerPaymentReport, getClientsWithOrdersInPeriod } from "./serviceReports";
 import { calculateFinancialMetrics, getMonthlyComparison, getConsultantMetrics, getUtilizationRate } from "./financialMetrics";
 import { z } from "zod";
-import { reportSchedules } from "../drizzle/schema";
+import { reportSchedules, serviceOrders } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export const appRouter = router({
@@ -67,6 +67,54 @@ export const appRouter = router({
         await updateContactMessageStatus(input.id, input.status);
         return { success: true };
       }),
+
+    // Get partner statistics
+    stats: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      // Get all service orders for this partner
+      const orders = await db.select().from(serviceOrders)
+        .where(eq(serviceOrders.partnerId, ctx.user.id));
+
+      // Calculate statistics
+      const totalOrders = orders.length;
+      const completedOrders = orders.filter(o => o.status === "completed").length;
+      const inProgressOrders = orders.filter(o => o.status === "in_progress").length;
+      const draftOrders = orders.filter(o => o.status === "draft").length;
+      const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+
+      // Calculate total hours
+      const totalHours = orders.reduce((sum: number, o) => sum + (Number(o.totalHours) || 0), 0);
+      const averageHours = totalOrders > 0 ? (totalHours / totalOrders).toFixed(2) : 0;
+
+      // Get partner payment info
+      const partner = await getPartnerByUserId(ctx.user.id);
+      
+      // Calculate revenue
+      let totalRevenue = 0;
+      const paymentType = partner?.paymentType || "hourly";
+      const paidValue = partner?.paidValue || "0";
+      
+      if (paymentType === "fixed") {
+        totalRevenue = completedOrders * (parseFloat(paidValue) || 0);
+      } else {
+        totalRevenue = totalHours * (parseFloat(paidValue) || 0);
+      }
+
+      return {
+        totalOrders,
+        completedOrders,
+        inProgressOrders,
+        draftOrders,
+        completionRate,
+        totalHours: parseFloat(totalHours.toFixed(2)),
+        averageHours: parseFloat(averageHours as string),
+        totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+        paymentType,
+        paymentValue: parseFloat(paidValue),
+      };
+    }),
   }),
 
   // Service Orders Router
@@ -427,6 +475,54 @@ export const appRouter = router({
 
         return { success: true };
       }),
+
+    // Get partner statistics
+    stats: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      // Get all service orders for this partner
+      const orders = await db.select().from(serviceOrders)
+        .where(eq(serviceOrders.partnerId, ctx.user.id));
+
+      // Calculate statistics
+      const totalOrders = orders.length;
+      const completedOrders = orders.filter(o => o.status === "completed").length;
+      const inProgressOrders = orders.filter(o => o.status === "in_progress").length;
+      const draftOrders = orders.filter(o => o.status === "draft").length;
+      const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+
+      // Calculate total hours
+      const totalHours = orders.reduce((sum: number, o) => sum + (Number(o.totalHours) || 0), 0);
+      const averageHours = totalOrders > 0 ? (totalHours / totalOrders).toFixed(2) : 0;
+
+      // Get partner payment info
+      const partner = await getPartnerByUserId(ctx.user.id);
+      
+      // Calculate revenue
+      let totalRevenue = 0;
+      const paymentType = partner?.paymentType || "hourly";
+      const paidValue = partner?.paidValue || "0";
+      
+      if (paymentType === "fixed") {
+        totalRevenue = completedOrders * (parseFloat(paidValue) || 0);
+      } else {
+        totalRevenue = totalHours * (parseFloat(paidValue) || 0);
+      }
+
+      return {
+        totalOrders,
+        completedOrders,
+        inProgressOrders,
+        draftOrders,
+        completionRate,
+        totalHours: parseFloat(totalHours.toFixed(2)),
+        averageHours: parseFloat(averageHours as string),
+        totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+        paymentType,
+        paymentValue: parseFloat(paidValue),
+      };
+    }),
   }),
 
   // Clients Router (Admin/Manager only)
@@ -681,6 +777,54 @@ export const appRouter = router({
         
         return { success: true };
       }),
+
+    // Get partner statistics
+    stats: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      // Get all service orders for this partner
+      const orders = await db.select().from(serviceOrders)
+        .where(eq(serviceOrders.partnerId, ctx.user.id));
+
+      // Calculate statistics
+      const totalOrders = orders.length;
+      const completedOrders = orders.filter(o => o.status === "completed").length;
+      const inProgressOrders = orders.filter(o => o.status === "in_progress").length;
+      const draftOrders = orders.filter(o => o.status === "draft").length;
+      const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+
+      // Calculate total hours
+      const totalHours = orders.reduce((sum: number, o) => sum + (Number(o.totalHours) || 0), 0);
+      const averageHours = totalOrders > 0 ? (totalHours / totalOrders).toFixed(2) : 0;
+
+      // Get partner payment info
+      const partner = await getPartnerByUserId(ctx.user.id);
+      
+      // Calculate revenue
+      let totalRevenue = 0;
+      const paymentType = partner?.paymentType || "hourly";
+      const paidValue = partner?.paidValue || "0";
+      
+      if (paymentType === "fixed") {
+        totalRevenue = completedOrders * (parseFloat(paidValue) || 0);
+      } else {
+        totalRevenue = totalHours * (parseFloat(paidValue) || 0);
+      }
+
+      return {
+        totalOrders,
+        completedOrders,
+        inProgressOrders,
+        draftOrders,
+        completionRate,
+        totalHours: parseFloat(totalHours.toFixed(2)),
+        averageHours: parseFloat(averageHours as string),
+        totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+        paymentType,
+        paymentValue: parseFloat(paidValue),
+      };
+    }),
   }),
 });
 
