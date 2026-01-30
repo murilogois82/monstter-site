@@ -106,3 +106,10 @@
 - [x] Investigar campos de valor no cadastro de parceiros
 - [x] Corrigir APIs de criação/atualização
 - [x] Testar gravação de valores
+
+## Correção de Erro ao Salvar Parceiro
+
+- [x] Investigar erro "não encontrado" ao salvar parceiro
+- [x] Verificar função createPartner no db.ts
+- [x] Corrigir o problema
+- [x] Testar salvamento de parceiro

@@ -341,6 +341,7 @@ export const appRouter = router({
           phone: input.phone || null,
           paymentType: input.paymentType,
           paidValue: input.paymentValue.toString(),
+          role: "partner",
           status: "active",
         });
 
