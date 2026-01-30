@@ -107,6 +107,8 @@ describe("Partner Router", () => {
       // Update the partner
       const updateInput = {
         id: createdPartner.id,
+        name: createdPartner.companyName || "Test Partner Company Updated",
+        email: createdPartner.email,
         cpf: "11111111111",
         bankName: "Itaú Unibanco",
         bankAccount: "999999-9",

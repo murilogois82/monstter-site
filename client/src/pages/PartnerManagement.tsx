@@ -142,11 +142,25 @@ export default function PartnerManagement() {
   const handleUpdatePartner = async () => {
     if (!selectedPartner) return;
 
+    // Validar campos obrigatórios
+    if (!selectedPartner.name || !selectedPartner.email) {
+      toast.error("Nome e e-mail são obrigatórios");
+      return;
+    }
+
     try {
       await updatePartnerMutation.mutateAsync({
         id: selectedPartner.id,
-        ...selectedPartner,
+        name: selectedPartner.name,
+        email: selectedPartner.email,
+        phone: selectedPartner.phone || undefined,
+        cpf: selectedPartner.cpf || undefined,
+        bankName: selectedPartner.bankName || undefined,
+        bankAccount: selectedPartner.bankAccount || undefined,
+        bankRoutingNumber: selectedPartner.bankRoutingNumber || undefined,
+        paymentType: selectedPartner.paymentType,
         paymentValue: selectedPartner.paymentValue ? parseFloat(selectedPartner.paymentValue) : 0,
+        notes: selectedPartner.notes || undefined,
       });
       toast.success("Parceiro atualizado com sucesso!");
       setIsEditDialogOpen(false);
@@ -172,7 +186,12 @@ export default function PartnerManagement() {
   };
 
   const openEditDialog = (partner: any) => {
-    setSelectedPartner({ ...partner });
+    // Mapear companyName para name para compatibilidade com o formulário
+    setSelectedPartner({
+      ...partner,
+      name: partner.companyName || partner.name || "",
+      paymentValue: partner.paidValue || partner.paymentValue || "",
+    });
     setIsEditDialogOpen(true);
   };
 
@@ -410,7 +429,7 @@ export default function PartnerManagement() {
                 <Label htmlFor="edit-name">Nome *</Label>
                 <Input
                   id="edit-name"
-                  value={selectedPartner.name}
+                  value={selectedPartner.name || ""}
                   onChange={(e) => setSelectedPartner({ ...selectedPartner, name: e.target.value })}
                   placeholder="Nome completo"
                 />
@@ -420,7 +439,7 @@ export default function PartnerManagement() {
                 <Input
                   id="edit-email"
                   type="email"
-                  value={selectedPartner.email}
+                  value={selectedPartner.email || ""}
                   onChange={(e) => setSelectedPartner({ ...selectedPartner, email: e.target.value })}
                   placeholder="email@exemplo.com"
                 />
@@ -429,7 +448,7 @@ export default function PartnerManagement() {
                 <Label htmlFor="edit-phone">Telefone</Label>
                 <Input
                   id="edit-phone"
-                  value={selectedPartner.phone}
+                  value={selectedPartner.phone || ""}
                   onChange={(e) => setSelectedPartner({ ...selectedPartner, phone: e.target.value })}
                   placeholder="(00) 00000-0000"
                 />
@@ -438,7 +457,7 @@ export default function PartnerManagement() {
                 <Label htmlFor="edit-cpf">CPF</Label>
                 <Input
                   id="edit-cpf"
-                  value={selectedPartner.cpf}
+                  value={selectedPartner.cpf || ""}
                   onChange={(e) => setSelectedPartner({ ...selectedPartner, cpf: e.target.value })}
                   placeholder="000.000.000-00"
                 />
@@ -447,7 +466,7 @@ export default function PartnerManagement() {
                 <Label htmlFor="edit-bankName">Banco</Label>
                 <Input
                   id="edit-bankName"
-                  value={selectedPartner.bankName}
+                  value={selectedPartner.bankName || ""}
                   onChange={(e) => setSelectedPartner({ ...selectedPartner, bankName: e.target.value })}
                   placeholder="Nome do banco"
                 />
@@ -456,7 +475,7 @@ export default function PartnerManagement() {
                 <Label htmlFor="edit-bankAccount">Conta Bancária</Label>
                 <Input
                   id="edit-bankAccount"
-                  value={selectedPartner.bankAccount}
+                  value={selectedPartner.bankAccount || ""}
                   onChange={(e) => setSelectedPartner({ ...selectedPartner, bankAccount: e.target.value })}
                   placeholder="0000000-0"
                 />
@@ -465,7 +484,7 @@ export default function PartnerManagement() {
                 <Label htmlFor="edit-bankRoutingNumber">Agência</Label>
                 <Input
                   id="edit-bankRoutingNumber"
-                  value={selectedPartner.bankRoutingNumber}
+                  value={selectedPartner.bankRoutingNumber || ""}
                   onChange={(e) => setSelectedPartner({ ...selectedPartner, bankRoutingNumber: e.target.value })}
                   placeholder="0000"
                 />
@@ -491,7 +510,7 @@ export default function PartnerManagement() {
                   id="edit-paymentValue"
                   type="number"
                   step="0.01"
-                  value={selectedPartner.paymentValue}
+                  value={selectedPartner.paymentValue || ""}
                   onChange={(e) => setSelectedPartner({ ...selectedPartner, paymentValue: e.target.value })}
                   placeholder="0.00"
                 />
@@ -500,7 +519,7 @@ export default function PartnerManagement() {
                 <Label htmlFor="edit-notes">Observações</Label>
                 <Textarea
                   id="edit-notes"
-                  value={selectedPartner.notes}
+                  value={selectedPartner.notes || ""}
                   onChange={(e) => setSelectedPartner({ ...selectedPartner, notes: e.target.value })}
                   placeholder="Informações adicionais sobre o parceiro"
                   rows={3}

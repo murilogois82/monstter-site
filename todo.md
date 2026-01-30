@@ -133,3 +133,14 @@
 - [x] Adicionar campos bancários (cpf, bankName, bankAccount, bankRoutingNumber) às APIs
 - [x] Criar testes unitários para validar gravação de campos bancários
 - [x] Corrigir erro de import duplicado no PartnerDashboard.tsx
+
+## Correção de Edição de Parceiros
+
+- [x] Investigar por que o campo nome está sendo limpo ao editar
+- [x] Corrigir validação obrigatória de todos os campos na edição
+- [x] Corrigir gravação do valor (paidValue) na atualização
+- [x] Testar edição de parceiro
+- [x] Mapear companyName para name no formulário
+- [x] Mapear paidValue para paymentValue no formulário
+- [x] Adicionar validação de campos obrigatórios na API
+- [x] Adicionar valores padrão (null coalescing) para campos opcionais

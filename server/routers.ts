@@ -424,6 +424,11 @@ export const appRouter = router({
           throw new Error("Acesso negado");
         }
 
+        // Validar campos obrigatórios
+        if (!input.name || !input.email) {
+          throw new Error("Nome e e-mail são obrigatórios");
+        }
+
         const updateData: any = {};
         if (input.name) updateData.companyName = input.name;
         if (input.email) updateData.email = input.email;
@@ -432,7 +437,7 @@ export const appRouter = router({
         if (input.bankName !== undefined) updateData.bankName = input.bankName || null;
         if (input.bankAccount !== undefined) updateData.bankAccount = input.bankAccount || null;
         if (input.bankRoutingNumber !== undefined) updateData.bankRoutingNumber = input.bankRoutingNumber || null;
-        if (input.paymentType) updateData.paymentType = input.paymentType;
+        if (input.paymentType !== undefined) updateData.paymentType = input.paymentType;
         if (input.paymentValue !== undefined) updateData.paidValue = input.paymentValue.toString();
         if (input.notes !== undefined) updateData.notes = input.notes || null;
 
