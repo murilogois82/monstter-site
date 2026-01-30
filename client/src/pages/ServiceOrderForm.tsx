@@ -46,13 +46,21 @@ export default function ServiceOrderForm() {
 
   // Preencher número de OS automaticamente quando carregar
   useEffect(() => {
-    if (nextOSNumber && !formData.osNumber) {
+    if (nextOSNumber) {
+      console.log("Numero da OS gerado:", nextOSNumber);
       setFormData((prev) => ({
         ...prev,
         osNumber: nextOSNumber,
       }));
     }
-  }, [nextOSNumber]);
+  }, [nextOSNumber, isAuthenticated]);
+
+  // Debug: log do formData quando osNumber muda
+  useEffect(() => {
+    if (formData.osNumber) {
+      console.log("FormData atualizado com osNumber:", formData.osNumber);
+    }
+  }, [formData.osNumber]);
 
   if (!isAuthenticated) {
     return (
@@ -118,6 +126,11 @@ export default function ServiceOrderForm() {
     setLoading(true);
     try {
       // Validar campos obrigatórios
+      if (!formData.osNumber.trim()) {
+        toast.error("Número da OS não foi gerado. Recarregue a página.");
+        setLoading(false);
+        return;
+      }
       if (!formData.clientName.trim()) {
         toast.error("Nome do cliente é obrigatório");
         setLoading(false);
@@ -178,6 +191,11 @@ export default function ServiceOrderForm() {
     setLoading(true);
     try {
       // Validar campos obrigatórios
+      if (!formData.osNumber.trim()) {
+        toast.error("Número da OS não foi gerado. Recarregue a página.");
+        setLoading(false);
+        return;
+      }
       if (!formData.clientName.trim()) {
         toast.error("Nome do cliente é obrigatório");
         setLoading(false);

@@ -78,3 +78,10 @@
 - [x] Verificar a API de clientes
 - [x] Corrigir preenchimento automático de cliente e e-mail
 - [x] Testar salvamento de OS com dados preenchidos
+
+## Correção de Número Automático da OS
+
+- [x] Investigar por que o número automático não está sendo gravado
+- [x] Verificar a API getNextOSNumber
+- [x] Corrigir o preenchimento do osNumber no formulário
+- [x] Testar criação de OS com número automático
