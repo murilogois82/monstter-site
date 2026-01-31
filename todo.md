@@ -179,3 +179,30 @@
 - [x] Adicionar query de pagamentos pendentes no PaymentsDashboard
 - [x] Usar dados reais da tabela os_payments em vez de cálculo baseado em horas
 - [x] Atualizar loading state para incluir pendingPaymentsLoading
+
+## Novas Funcionalidades de Pagamentos e Dashboard de Parceiros
+
+### Seletor de Datas no Dashboard Financeiro
+- [ ] Adicionar componente de seletor de datas (data inicial e final)
+- [ ] Implementar filtro de pagamentos pendentes por período
+- [ ] Atualizar query payment.listPending para aceitar parâmetros de data
+- [ ] Exibir total de pagamentos no período selecionado
+- [ ] Testar filtro com diferentes períodos
+
+### Checkboxes para Pagamentos Vencidos
+- [ ] Calcular dias desde a criação do pagamento
+- [ ] Identificar pagamentos com mais de 20 dias
+- [ ] Adicionar checkboxes para seleção múltipla
+- [ ] Implementar ação em lote (marcar como agendado/concluído)
+- [ ] Adicionar indicador visual para pagamentos vencidos
+- [ ] Testar seleção e ações em lote
+
+### Dashboard de Gestão de OS para Parceiros
+- [ ] Criar página PartnerOSManagement.tsx
+- [ ] Implementar query para listar OS do parceiro autenticado
+- [ ] Adicionar filtros por período, status e cliente
+- [ ] Exibir horas trabalhadas e ganhos totais
+- [ ] Mostrar detalhes de cada OS (cliente, horas, valor)
+- [ ] Adicionar gráficos de horas e ganhos por período
+- [ ] Implementar acesso restrito apenas para parceiros
+- [ ] Testar dashboard com dados de múltiplos parceiros

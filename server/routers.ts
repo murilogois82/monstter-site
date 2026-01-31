@@ -349,12 +349,17 @@ export const appRouter = router({
     }),
 
     // Get pending payments (admin/manager only)
-    listPending: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
-        throw new Error("Acesso negado");
-      }
-      return await getPendingPayments();
-    }),
+    listPending: protectedProcedure
+      .input(z.object({
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+          throw new Error("Acesso negado");
+        }
+        return await getPendingPayments(input);
+      }),
 
     // Update payment status (admin/manager only)
     updateStatus: protectedProcedure

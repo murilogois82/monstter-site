@@ -5,6 +5,9 @@ import AdminNav from "@/components/AdminNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLocation } from "wouter";
+import { useState } from "react";
+import { subMonths, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import {
   BarChart,
   Bar,
@@ -24,6 +27,9 @@ import {
 export default function PaymentsDashboard() {
   const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+  const [periodStart, setPeriodStart] = useState<Date>(subMonths(new Date(), 1));
+  const [periodEnd, setPeriodEnd] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const { data: orders, isLoading: ordersLoading } = trpc.serviceOrder.listAll.useQuery(undefined, {
     enabled: isAuthenticated && (user?.role === "admin" || user?.role === "manager"),
@@ -33,7 +39,10 @@ export default function PaymentsDashboard() {
     enabled: isAuthenticated && user?.role === "admin",
   });
 
-  const { data: pendingPaymentsList = [], isLoading: pendingPaymentsLoading } = trpc.payment.listPending.useQuery(undefined, {
+  const { data: pendingPaymentsList = [], isLoading: pendingPaymentsLoading } = trpc.payment.listPending.useQuery({
+    startDate: periodStart,
+    endDate: periodEnd,
+  }, {
     enabled: isAuthenticated && (user?.role === "admin" || user?.role === "manager"),
   });
 
