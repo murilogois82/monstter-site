@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import Layout from "@/components/Layout";
@@ -16,9 +17,34 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Clock, User, CheckCircle2 } from "lucide-react";
 
 export default function CalendarPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
+  const [, setLocation] = useLocation();
   const [selectedPartner, setSelectedPartner] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
+
+  // Redirect if not authenticated or not admin/manager
+  useEffect(() => {
+    if (!loading && (!isAuthenticated || (user?.role !== "admin" && user?.role !== "manager"))) {
+      setLocation("/login");
+    }
+  }, [isAuthenticated, user, loading, setLocation]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto"></div>
+            <p className="mt-4 text-gray-400">Carregando...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   // Fetch service orders
   const { data: serviceOrders = [], isLoading: ordersLoading } =

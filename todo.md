@@ -286,3 +286,15 @@
 - [ ] Testar navegação entre meses
 - [ ] Testar filtros de parceiro
 - [ ] Testar responsividade em mobile
+
+## Correção de Proteção de Rotas
+
+- [x] Investigar por que Login.tsx está redirecionando usuários autenticados
+- [x] Verificar se useAuth() está retornando dados corretos
+- [x] Corrigir lógica de redirecionamento baseada em role
+- [x] Adicionar proteção de rotas no AdminDashboard
+- [x] Adicionar proteção de rotas no PartnerDashboard
+- [x] Adicionar proteção de rotas no CalendarPage
+- [ ] Testar acesso com admin
+- [ ] Testar acesso com partner
+- [ ] Testar acesso com user comum

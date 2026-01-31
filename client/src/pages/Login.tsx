@@ -12,14 +12,17 @@ export default function Login() {
 
   // Redirect based on role if already authenticated
   useEffect(() => {
-    if (isAuthenticated && user && !loading) {
-      if (user.role === "admin" || user.role === "manager") {
-        setLocation("/admin");
-      } else if (user.role === "partner") {
-        setLocation("/partners/dashboard");
-      } else {
-        setLocation("/");
-      }
+    if (!loading && isAuthenticated && user) {
+      const timer = setTimeout(() => {
+        if (user.role === "admin" || user.role === "manager") {
+          setLocation("/admin");
+        } else if (user.role === "partner") {
+          setLocation("/partners/dashboard");
+        } else {
+          setLocation("/");
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [isAuthenticated, user, loading, setLocation]);
 
@@ -37,7 +40,16 @@ export default function Login() {
   }
 
   if (isAuthenticated && user) {
-    return null; // Will redirect via useEffect
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Redirecionando...</p>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   return (
