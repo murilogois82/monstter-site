@@ -311,3 +311,15 @@
 - [ ] Testar login com usuário admin
 - [ ] Testar login com usuário partner
 - [ ] Verificar console do navegador para erros
+
+## Correção de Permissões para Admin e Gerente
+
+- [x] Investigar por que admin e gerente não conseguem acessar áreas restritas
+- [x] Verificar lógica de proteção de rotas no AdminDashboard
+- [x] Verificar lógica de proteção de rotas no CalendarPage
+- [x] Corrigir verificação de role para aceitar admin e manager
+- [x] Remover bloqueio desnecessário de acesso
+- [x] Aplicar permissões total para admin e gerente
+- [x] Renomear rota partner.me para partner.getMe para evitar conflito com auth.me
+- [ ] Testar acesso com usuário admin
+- [ ] Testar acesso com usuário gerente

@@ -384,7 +384,7 @@ export const appRouter = router({
   // Partners Router
   partner: router({
     // Get current partner info
-    me: protectedProcedure.query(async ({ ctx }) => {
+    getMe: protectedProcedure.query(async ({ ctx }) => {
       return await getPartnerByUserId(ctx.user.id);
     }),
 
