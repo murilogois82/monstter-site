@@ -298,3 +298,16 @@
 - [ ] Testar acesso com admin
 - [ ] Testar acesso com partner
 - [ ] Testar acesso com user comum
+
+## Correção de Falha na Autenticação
+
+- [x] Investigar fluxo de OAuth Manus
+- [x] Verificar se o callback está sendo chamado corretamente
+- [x] Verificar se useAuth() está retornando user e isAuthenticated
+- [x] Verificar armazenamento de sessão/cookie
+- [x] Verificar se o token JWT está sendo criado
+- [x] Corrigir contexto para não lançar erro quando não há sessão
+- [x] Adicionar debug logging para erros de autenticação
+- [ ] Testar login com usuário admin
+- [ ] Testar login com usuário partner
+- [ ] Verificar console do navegador para erros
