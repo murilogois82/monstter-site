@@ -18,12 +18,15 @@ import PartnerManagement from "./pages/PartnerManagement";
 import PartnerUserAssociation from "./pages/PartnerUserAssociation";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import FinancialDashboard from "./pages/FinancialDashboard";
+import Login from "./pages/Login";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/login"} component={Login} />
       <Route path={"/sobre"} component={About} />
       <Route path={"/servicos"} component={Services} />
       <Route path={"/contato"} component={Contact} />
@@ -37,7 +40,7 @@ function Router() {
       <Route path={"/admin/partners"} component={PartnerManagement} />
       <Route path={"/admin/partner-users"} component={PartnerUserAssociation} />
       <Route path={"/admin/financial"} component={FinancialDashboard} />
-      <Route path={"/admin"} component={AdminServiceOrders} />
+      <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

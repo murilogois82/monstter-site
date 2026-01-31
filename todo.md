@@ -206,3 +206,41 @@
 - [ ] Adicionar gráficos de horas e ganhos por período
 - [ ] Implementar acesso restrito apenas para parceiros
 - [ ] Testar dashboard com dados de múltiplos parceiros
+
+## Tela de Login para Parceiros e Administração
+
+### Página de Login
+- [x] Criar componente de login unificado (LoginPage.tsx)
+- [x] Integrar com OAuth Manus
+- [x] Exibir informações do usuário após login
+- [x] Implementar logout
+- [x] Adicionar verificação de role do usuário
+
+### Redirecionamento Baseado em Role
+- [x] Criar lógica de redirecionamento no App.tsx
+- [x] Admin/Manager → Dashboard de Administração
+- [x] Partner → Dashboard de Parceiros
+- [x] User → Página inicial ou dashboard pessoal
+- [x] Proteger rotas por role
+
+### Dashboard de Administração
+- [x] Criar AdminDashboard.tsx
+- [x] Exibir resumo de OS, parceiros e pagamentos
+- [x] Adicionar links para gerenciamento de OS
+- [x] Adicionar links para gerenciamento de parceiros
+- [x] Adicionar links para gerenciamento de pagamentos
+- [x] Integrar logout
+
+### Dashboard de Parceiros
+- [x] Criar PartnerDashboard.tsx (já existia)
+- [x] Listar OS do parceiro autenticado
+- [x] Exibir horas trabalhadas
+- [x] Exibir ganhos totais
+- [x] Adicionar filtros por período
+- [x] Mostrar status de pagamentos
+
+### Testes
+- [ ] Testar fluxo de login
+- [ ] Testar redirecionamento por role
+- [ ] Testar acesso restrito a páginas
+- [ ] Testar logout
