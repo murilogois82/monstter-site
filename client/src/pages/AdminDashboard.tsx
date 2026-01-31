@@ -41,7 +41,14 @@ export default function AdminDashboard() {
     return null; // Will redirect via useEffect
   }
 
-  const menuItems = [
+    const menuItems = [
+    {
+      title: "Calendário",
+      description: "Visualizar OS agendadas e disponibilidade",
+      icon: BarChart3,
+      href: "/calendar",
+      color: "bg-cyan-500/10 text-cyan-500 border-cyan-500/30",
+    },
     {
       title: "Ordens de Serviço",
       description: "Gerenciar todas as ordens de serviço",

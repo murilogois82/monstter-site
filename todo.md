@@ -244,3 +244,45 @@
 - [ ] Testar redirecionamento por role
 - [ ] Testar acesso restrito a páginas
 - [ ] Testar logout
+
+## Calendário Interativo de OS e Disponibilidade
+
+### Componente de Calendário
+- [x] Criar CalendarComponent.tsx com visualização mensal
+- [x] Implementar navegação entre meses
+- [x] Exibir dias com OS agendadas em destaque
+- [x] Mostrar prazos de conclusão
+- [x] Adicionar cores diferentes por status (draft, in_progress, completed)
+- [x] Adicionar legenda de status
+- [x] Marcar dia atual com destaque especial
+
+### Exibição de OS no Calendário
+- [x] Buscar OS com datas agendadas
+- [x] Exibir número de OS por dia
+- [x] Mostrar nome do parceiro responsável
+- [x] Adicionar tooltip com detalhes da OS
+- [x] Implementar click para ver detalhes completos
+
+### Disponibilidade de Parceiros
+- [x] Criar visualização de disponibilidade por parceiro
+- [x] Mostrar horas disponíveis vs horas comprometidas
+- [x] Indicar parceiros sobrecarregados (vermelho)
+- [x] Indicar parceiros com disponibilidade (verde)
+- [x] Adicionar filtro por parceiro no calendário
+- [x] Exibir barra de progresso de utilização
+- [x] Mostrar percentual de utilização
+
+### Página de Calendário
+- [x] Criar CalendarPage.tsx
+- [x] Integrar com AdminDashboard
+- [x] Adicionar filtros: período, parceiro, status
+- [x] Implementar visualização em grid/lista
+- [x] Adicionar opção de exportar calendário
+- [x] Exibir estatísticas resumidas
+- [x] Adicionar rota /calendar
+
+### Testes
+- [ ] Testar exibição de OS no calendário
+- [ ] Testar navegação entre meses
+- [ ] Testar filtros de parceiro
+- [ ] Testar responsividade em mobile
