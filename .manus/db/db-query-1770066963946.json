@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, email, role FROM users WHERE email = 'murilo.gois@ramo.com.br'; UPDATE users SET role = 'admin' WHERE email = 'murilo.gois@ramo.com.br'; SELECT id, email, role FROM users WHERE email = 'murilo.gois@ramo.com.br';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4XjEEts3MFeNP3d.root --database VHJr573C49poDxnZCnBs44 --execute SELECT id, email, role FROM users WHERE email = 'murilo.gois@ramo.com.br'; UPDATE users SET role = 'admin' WHERE email = 'murilo.gois@ramo.com.br'; SELECT id, email, role FROM users WHERE email = 'murilo.gois@ramo.com.br';",
+  "rows": [
+    {
+      "id": "1",
+      "email": "murilo.gois@ramo.com.br",
+      "role": "admin"
+    },
+    {
+      "id": "id",
+      "email": "email",
+      "role": "role"
+    },
+    {
+      "id": "1",
+      "email": "murilo.gois@ramo.com.br",
+      "role": "admin"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\trole\n1\tmurilo.gois@ramo.com.br\tadmin\nid\temail\trole\n1\tmurilo.gois@ramo.com.br\tadmin\n",
+  "stderr": "",
+  "execution_time_ms": 107
+}

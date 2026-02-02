@@ -11,10 +11,14 @@ import {
   DollarSign,
   Settings,
   LogOut,
+  Eye,
+  EyeOff,
 } from "lucide-react";
+import { useViewMode } from "@/contexts/ViewModeContext";
 
 export default function AdminDashboard() {
   const { user, isAuthenticated, loading, logout } = useAuth();
+  const { viewMode, toggleViewMode } = useViewMode();
   const [, setLocation] = useLocation();
 
   // Redirect if not authenticated or not admin/manager
@@ -41,7 +45,7 @@ export default function AdminDashboard() {
     return null; // Will redirect via useEffect
   }
 
-    const menuItems = [
+    const adminMenuItems = [
     {
       title: "Calendário",
       description: "Visualizar OS agendadas e disponibilidade",
@@ -93,6 +97,25 @@ export default function AdminDashboard() {
     },
   ];
 
+  const partnerMenuItems = [
+    {
+      title: "Minhas Ordens de Servico",
+      description: "Visualizar e gerenciar suas ordens de servico",
+      icon: FileText,
+      href: "/partners/service-orders",
+      color: "bg-blue-500/10 text-blue-500 border-blue-500/30",
+    },
+    {
+      title: "Meu Dashboard",
+      description: "Visualizar seu desempenho e ganhos",
+      icon: BarChart3,
+      href: "/partners/dashboard",
+      color: "bg-green-500/10 text-green-500 border-green-500/30",
+    },
+  ];
+
+  const menuItems = viewMode === 'admin' ? adminMenuItems : partnerMenuItems;
+
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black">
@@ -106,18 +129,42 @@ export default function AdminDashboard() {
               <p className="text-gray-400">
                 Bem-vindo, {user.name || user.email}
               </p>
+              <div className="mt-2 text-sm">
+                <span className={`px-3 py-1 rounded-full ${viewMode === 'admin' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50' : 'bg-purple-500/20 text-purple-400 border border-purple-500/50'}`}>
+                  Modo: {viewMode === 'admin' ? 'Administrador' : 'Parceiro'}
+                </span>
+              </div>
             </div>
-            <Button
-              onClick={() => {
-                logout();
-                setLocation("/");
-              }}
-              variant="outline"
-              className="flex items-center gap-2 border-red-500/30 hover:bg-red-500/10"
-            >
-              <LogOut className="w-4 h-4" />
-              Sair
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={toggleViewMode}
+                variant="outline"
+                className="flex items-center gap-2 border-cyan-500/30 hover:bg-cyan-500/10"
+              >
+                {viewMode === 'admin' ? (
+                  <>
+                    <Eye className="w-4 h-4" />
+                    Ver como Parceiro
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="w-4 h-4" />
+                    Ver como Admin
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={() => {
+                  logout();
+                  setLocation("/");
+                }}
+                variant="outline"
+                className="flex items-center gap-2 border-red-500/30 hover:bg-red-500/10"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair
+              </Button>
+            </div>
           </div>
 
           {/* Quick Stats */}

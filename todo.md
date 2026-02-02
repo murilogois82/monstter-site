@@ -334,3 +334,24 @@
 - [x] Remover bloqueio desnecessário em /admin e /partners/service-orders
 - [ ] Testar acesso com usuário admin
 - [ ] Testar acesso com usuário manager
+
+
+## Resolução Final de Acesso - Murilo Admin
+
+- [x] Atualizar role de murilo.gois@ramo.com.br para admin no banco de dados
+- [x] Verificar fluxo de autenticação OAuth
+- [x] Confirmar que AdminDashboard e CalendarPage funcionam com admin
+- [x] Documentar solução para evitar problemas futuros
+
+
+## Modo de Visualização para Admin
+
+- [x] Criar contexto ViewModeContext para gerenciar modo de visualização
+- [x] Implementar botão de alternância no AdminDashboard
+- [x] Adaptar AdminDashboard para mostrar interface de parceiro quando em modo partner
+- [x] Adicionar ViewModeProvider ao App.tsx
+- [x] Adicionar indicador visual de qual modo está ativo (badge com cor diferente)
+- [x] Implementar menu dinâmico baseado em viewMode
+- [ ] Testar alternância entre modos
+- [ ] Testar navegação para páginas de parceiro
+- [ ] Validar que dados corretos são exibidos em cada modo
