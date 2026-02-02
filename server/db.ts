@@ -92,7 +92,23 @@ export async function getUserById(id: number): Promise<InsertUser | undefined> {
   }
 }
 
-export async function updateUserRole(userId: number, role: "admin" | "user" | "manager"): Promise<boolean> {
+export async function getUserByOpenId(openId: string): Promise<InsertUser | undefined> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user by openId: database not available");
+    return;
+  }
+
+  try {
+    const result = await db.select().from(users).where(eq(users.openId, openId));
+    return result[0];
+  } catch (error) {
+    console.error("[Database] Failed to get user by openId:", error);
+    throw error;
+  }
+}
+
+export async function updateUserRole(userId: number, role: "admin" | "user" | "manager" | "partner"): Promise<boolean> {
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot update user role: database not available");

@@ -597,6 +597,7 @@ export const appRouter = router({
         }
 
         const result = await createUser({
+          openId: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           name: input.name,
           email: input.email,
           role: input.role,
@@ -620,12 +621,12 @@ export const appRouter = router({
           throw new Error("Acesso negado");
         }
 
-        const result = await updateUserRole(input.id, input.role);
-        if (!result) {
+        const success = await updateUserRole(input.id, input.role);
+        if (!success) {
           throw new Error("Falha ao atualizar usuário");
         }
 
-        return { success: true, id: result.id };
+        return { success: true, id: input.id };
       }),
 
     // Get user by ID

@@ -323,3 +323,14 @@
 - [x] Renomear rota partner.me para partner.getMe para evitar conflito com auth.me
 - [ ] Testar acesso com usuário admin
 - [ ] Testar acesso com usuário gerente
+
+## Correção de Acesso Restrito para Admin e Manager
+
+- [x] Investigar por que useAuth() não retorna user.role corretamente
+- [x] Verificar se auth.me está retornando dados do usuário com role
+- [x] Verificar se o usuário está sendo sincronizado com role correto no banco
+- [x] Criar função getUserByOpenId no db.ts
+- [x] Corrigir fluxo de autenticação para incluir role do usuário
+- [x] Remover bloqueio desnecessário em /admin e /partners/service-orders
+- [ ] Testar acesso com usuário admin
+- [ ] Testar acesso com usuário manager
