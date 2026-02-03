@@ -355,3 +355,13 @@
 - [ ] Testar alternância entre modos
 - [ ] Testar navegação para páginas de parceiro
 - [ ] Validar que dados corretos são exibidos em cada modo
+
+
+## Persistência do Modo de Visualização
+
+- [x] Atualizar ViewModeContext para salvar modo no localStorage
+- [x] Carregar modo do localStorage ao inicializar contexto
+- [x] Adicionar useEffect para salvar/carregar do localStorage
+- [x] Implementar loading state para evitar flash ao carregar
+- [x] Testar persistência ao recarregar página
+- [x] Validar que modo é mantido entre sessões
