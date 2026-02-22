@@ -51,10 +51,8 @@ jobs:
         env:
           NODE_ENV: production
           CI: true
-          # Descomente e configure as variáveis abaixo como GitHub Secrets
-          # (Settings → Secrets and variables → Actions → New repository secret)
-          # VITE_ANALYTICS_ENDPOINT: ${{ secrets.VITE_ANALYTICS_ENDPOINT }}
-          # VITE_ANALYTICS_WEBSITE_ID: ${{ secrets.VITE_ANALYTICS_WEBSITE_ID }}
+           VITE_ANALYTICS_ENDPOINT: ${{ secrets.VITE_ANALYTICS_ENDPOINT }}
+           VITE_ANALYTICS_WEBSITE_ID: ${{ secrets.VITE_ANALYTICS_WEBSITE_ID }}
 
       - name: Atualizar pasta docs com o novo build
         run: |
