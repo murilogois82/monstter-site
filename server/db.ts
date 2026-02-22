@@ -812,3 +812,180 @@ export async function getUserByUsername(username: string) {
     throw error;
   }
 }
+
+
+// ==================== PASSWORD RESET ====================
+
+/**
+ * Generate a secure random token for password reset
+ */
+export function generateResetToken(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let token = '';
+  for (let i = 0; i < 32; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
+}
+
+/**
+ * Create a password reset token for a user
+ */
+export async function createPasswordResetToken(userId: number, expiresInHours: number = 24) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    const token = generateResetToken();
+    const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000);
+
+    const conn = await (db as any).client.getConnection();
+    await conn.execute(
+      "INSERT INTO password_reset_tokens (userId, token, expiresAt) VALUES (?, ?, ?)",
+      [userId, token, expiresAt]
+    );
+    conn.release();
+
+    return { token, expiresAt };
+  } catch (error) {
+    console.error("[PasswordReset] Failed to create token:", error);
+    throw error;
+  }
+}
+
+/**
+ * Validate a password reset token
+ */
+export async function validateResetToken(token: string) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    const conn = await (db as any).client.getConnection();
+    const [rows] = await conn.execute(
+      "SELECT * FROM password_reset_tokens WHERE token = ? AND expiresAt > NOW() AND usedAt IS NULL",
+      [token]
+    );
+    conn.release();
+
+    const resetToken = (rows as any[])[0];
+    if (!resetToken) {
+      throw new Error("Token invalido ou expirado");
+    }
+
+    return resetToken;
+  } catch (error) {
+    console.error("[PasswordReset] Failed to validate token:", error);
+    throw error;
+  }
+}
+
+/**
+ * Reset password using a valid token
+ */
+export async function resetPasswordWithToken(token: string, newPassword: string) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    // Validate token
+    const resetToken = await validateResetToken(token);
+
+    // Hash new password
+    const passwordHash = await hashPassword(newPassword);
+
+    // Update user password
+    const conn = await (db as any).client.getConnection();
+    await conn.execute(
+      "UPDATE users SET passwordHash = ? WHERE id = ?",
+      [passwordHash, resetToken.userId]
+    );
+
+    // Mark token as used
+    await conn.execute(
+      "UPDATE password_reset_tokens SET usedAt = NOW() WHERE id = ?",
+      [resetToken.id]
+    );
+    conn.release();
+
+    // Get updated user
+    const [userRows] = await conn.execute(
+      "SELECT id, username, name, email, role FROM users WHERE id = ?",
+      [resetToken.userId]
+    );
+    conn.release();
+
+    return (userRows as any[])[0];
+  } catch (error) {
+    console.error("[PasswordReset] Failed to reset password:", error);
+    throw error;
+  }
+}
+
+/**
+ * Request password reset for a user by email
+ */
+export async function requestPasswordReset(email: string) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    const conn = await (db as any).client.getConnection();
+    const [rows] = await conn.execute(
+      "SELECT id, email FROM users WHERE email = ?",
+      [email]
+    );
+    conn.release();
+
+    const user = (rows as any[])[0];
+    if (!user) {
+      // Don't reveal if email exists
+      return { success: true, message: "Se o e-mail existe, um link de reset foi enviado" };
+    }
+
+    // Create reset token
+    const { token, expiresAt } = await createPasswordResetToken(user.id);
+
+    return {
+      success: true,
+      userId: user.id,
+      token,
+      expiresAt,
+      message: "Link de reset enviado para o e-mail",
+    };
+  } catch (error) {
+    console.error("[PasswordReset] Failed to request reset:", error);
+    throw error;
+  }
+}
+
+/**
+ * Clean up expired reset tokens
+ */
+export async function cleanupExpiredResetTokens() {
+  const db = await getDb();
+  if (!db) {
+    return 0;
+  }
+
+  try {
+    const conn = await (db as any).client.getConnection();
+    const [result] = await conn.execute(
+      "DELETE FROM password_reset_tokens WHERE expiresAt < NOW() OR (usedAt IS NOT NULL AND createdAt < DATE_SUB(NOW(), INTERVAL 7 DAY))"
+    );
+    conn.release();
+
+    return (result as any).affectedRows || 0;
+  } catch (error) {
+    console.error("[PasswordReset] Failed to cleanup tokens:", error);
+    return 0;
+  }
+}

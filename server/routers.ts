@@ -1,9 +1,10 @@
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, getPendingPayments, createPartner, getPartnerByUserId, getAllPartners, updatePartner, deletePartner, getAllUsers, getUserById, updateUserRole, createUser, getDb, logAuditEvent, getAuditLogs, getAuditLogCount, getAuditLogsByUser, getAuditLogsByActionType, deleteOldAuditLogs, loginUser, hashPassword, comparePassword, createUserWithPassword, updateUserPassword, getUserByUsername } from "./db";
+import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, getPendingPayments, createPartner, getPartnerByUserId, getAllPartners, updatePartner, deletePartner, getAllUsers, getUserById, updateUserRole, createUser, getDb, logAuditEvent, getAuditLogs, getAuditLogCount, getAuditLogsByUser, getAuditLogsByActionType, deleteOldAuditLogs, loginUser, hashPassword, comparePassword, createUserWithPassword, updateUserPassword, getUserByUsername, createPasswordResetToken, validateResetToken, resetPasswordWithToken, requestPasswordReset, cleanupExpiredResetTokens } from "./db";
 import { clientRouter } from "./clients";
 import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
+import { sendPasswordResetEmail } from "./passwordResetEmail";
 import { generateClientServiceReport, generatePartnerPaymentReport, getClientsWithOrdersInPeriod } from "./serviceReports";
 import { calculateFinancialMetrics, getMonthlyComparison, getConsultantMetrics, getUtilizationRate } from "./financialMetrics";
 import { z } from "zod";
@@ -36,6 +37,57 @@ export const appRouter = router({
           return { success: true, user };
         } catch (error) {
           throw new Error("Usuario ou senha invalidos");
+        }
+      }),
+    requestReset: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const result = await requestPasswordReset(input.email);
+          return result;
+        } catch (error) {
+          throw new Error("Falha ao solicitar reset");
+        }
+      }),
+    sendResetEmail: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        token: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          await sendPasswordResetEmail(input.email, input.token);
+          return { success: true };
+        } catch (error) {
+          console.error("[Auth] Failed to send email:", error);
+          return { success: false };
+        }
+      }),
+    validateToken: publicProcedure
+      .input(z.object({
+        token: z.string(),
+      }))
+      .query(async ({ input }) => {
+        try {
+          const resetToken = await validateResetToken(input.token);
+          return { valid: true, userId: resetToken.userId };
+        } catch (error) {
+          return { valid: false };
+        }
+      }),
+    resetPassword: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        newPassword: z.string().min(6),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const user = await resetPasswordWithToken(input.token, input.newPassword);
+          return { success: true, user };
+        } catch (error: any) {
+          throw new Error(error.message || "Falha ao redefinir");
         }
       }),
   }),

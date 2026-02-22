@@ -408,3 +408,15 @@
 - [x] Criar usuario admin padrao (admin/admin)
 - [ ] Remover/desabilitar OAuth
 - [x] Testar fluxo completo de autenticacao
+
+
+## Recuperacao de Senha por E-mail
+
+- [x] Criar tabela de tokens de reset de senha
+- [x] Implementar funcoes de geracao e validacao de tokens
+- [x] Criar APIs de solicitacao e reset de senha
+- [x] Criar pagina de solicitacao de recuperacao de senha
+- [x] Criar pagina de reset de senha com token
+- [x] Configurar envio de e-mail com link de reset
+- [x] Testar fluxo completo de recuperacao
+- [x] Documentar sistema de recuperacao (RECUPERACAO_SENHA.md)
