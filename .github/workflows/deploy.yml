@@ -58,18 +58,10 @@ jobs:
 
       - name: Atualizar pasta docs com o novo build
         run: |
-          # Preservar o CNAME antes de limpar
           CNAME_CONTENT=$(cat docs/CNAME 2>/dev/null || echo "monstter.com.br")
-
-          # Limpar pasta docs (preservando .gitkeep se existir)
           find docs/ -mindepth 1 ! -name '.gitkeep' -delete 2>/dev/null || rm -rf docs/*
-
-          # Copiar build para docs
           cp -r dist/public/. docs/
-
-          # Restaurar o CNAME
           echo "$CNAME_CONTENT" > docs/CNAME
-
           echo "Conteúdo da pasta docs após o build:"
           ls -la docs/
 
@@ -81,18 +73,22 @@ jobs:
           git add docs/
           if git diff --staged --quiet; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "Nenhuma mudança detectada na pasta docs/ — deploy ignorado."
+            echo "Nenhuma mudança detectada — deploy ignorado."
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "Mudanças detectadas na pasta docs/ — realizando deploy..."
+            echo "Mudanças detectadas — realizando deploy..."
           fi
 
       - name: Commit e push do build para o GitHub Pages
         if: steps.check_changes.outputs.has_changes == 'true'
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
         run: |
+          BUILD_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           git commit -m "chore: deploy automático via GitHub Actions [skip ci]
 
-          - Build gerado em: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
-          - Branch: ${{ github.ref_name }}
-          - Commit de origem: ${{ github.sha }}"
+          - Build gerado em: ${BUILD_DATE}
+          - Branch: ${REF_NAME}
+          - Commit de origem: ${SHA}"
           git push origin main
