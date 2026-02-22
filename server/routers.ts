@@ -1,15 +1,15 @@
-import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, getPendingPayments, createPartner, getPartnerByUserId, getAllPartners, updatePartner, deletePartner, getAllUsers, getUserById, updateUserRole, createUser, getDb } from "./db";
+import { createContactMessage, getAllContactMessages, updateContactMessageStatus, createServiceOrder, updateServiceOrder, getServiceOrderById, getServiceOrdersByPartnerId, getAllServiceOrders, getServiceOrdersByStatus, createOSPayment, updateOSPayment, getPaymentsByPartnerId, getPendingPayments, createPartner, getPartnerByUserId, getAllPartners, updatePartner, deletePartner, getAllUsers, getUserById, updateUserRole, createUser, getDb, logAuditEvent, getAuditLogs, getAuditLogCount, getAuditLogsByUser, getAuditLogsByActionType, deleteOldAuditLogs, loginUser, hashPassword, comparePassword, createUserWithPassword, updateUserPassword, getUserByUsername } from "./db";
 import { clientRouter } from "./clients";
 import { sendServiceOrderEmail, notifyManagerOSSent } from "./email";
 import { generateClientServiceReport, generatePartnerPaymentReport, getClientsWithOrdersInPeriod } from "./serviceReports";
 import { calculateFinancialMetrics, getMonthlyComparison, getConsultantMetrics, getUtilizationRate } from "./financialMetrics";
 import { z } from "zod";
-import { reportSchedules, serviceOrders } from "../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { COOKIE_NAME } from "@shared/const";
+import { reportSchedules, serviceOrders, users } from "../drizzle/schema";
+import { eq, and } from "drizzle-orm";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -23,6 +23,21 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    loginLocal: publicProcedure
+      .input(z.object({
+        username: z.string().min(3),
+        password: z.string().min(6),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        try {
+          const user = await loginUser(input.username, input.password);
+          const cookieOptions = getSessionCookieOptions(ctx.req);
+          ctx.res.cookie(COOKIE_NAME, JSON.stringify(user), cookieOptions);
+          return { success: true, user };
+        } catch (error) {
+          throw new Error("Usuario ou senha invalidos");
+        }
+      }),
   }),
 
   // Contact Messages Router
@@ -618,13 +633,39 @@ export const appRouter = router({
       }))
       .mutation(async ({ input, ctx }) => {
         if (ctx.user.role !== "admin") {
+          await logAuditEvent({
+            userId: ctx.user.id,
+            actionType: 'ACCESS_DENIED',
+            targetUserId: input.id,
+            status: 'FAILED',
+            errorMessage: 'Acesso negado - usuário não é admin',
+          });
           throw new Error("Acesso negado");
         }
 
+        const userBefore = await getUserById(input.id);
         const success = await updateUserRole(input.id, input.role);
         if (!success) {
+          await logAuditEvent({
+            userId: ctx.user.id,
+            actionType: 'PERMISSION_CHANGE',
+            targetUserId: input.id,
+            targetUserName: userBefore?.name || 'Unknown',
+            status: 'FAILED',
+            errorMessage: 'Falha ao atualizar usuário',
+          });
           throw new Error("Falha ao atualizar usuário");
         }
+
+        await logAuditEvent({
+          userId: ctx.user.id,
+          actionType: 'PERMISSION_CHANGE',
+          targetUserId: input.id,
+          targetUserName: userBefore?.name || 'Unknown',
+          oldValues: { role: userBefore?.role },
+          newValues: { role: input.role },
+          status: 'SUCCESS',
+        });
 
         return { success: true, id: input.id };
       }),
@@ -873,7 +914,104 @@ export const appRouter = router({
       };
     }),
   }),
+
+  // Audit Logs Router
+  audit: router({
+    getLogs: protectedProcedure
+      .input(z.object({
+        userId: z.number().optional(),
+        targetUserId: z.number().optional(),
+        actionType: z.string().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+        limit: z.number().default(100),
+        offset: z.number().default(0),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Acesso negado");
+        }
+
+        return await getAuditLogs({
+          userId: input.userId,
+          targetUserId: input.targetUserId,
+          actionType: input.actionType,
+          startDate: input.startDate,
+          endDate: input.endDate,
+          limit: input.limit,
+          offset: input.offset,
+        });
+      }),
+
+    getCount: protectedProcedure
+      .input(z.object({
+        userId: z.number().optional(),
+        targetUserId: z.number().optional(),
+        actionType: z.string().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Acesso negado");
+        }
+
+        return await getAuditLogCount({
+          userId: input.userId,
+          targetUserId: input.targetUserId,
+          actionType: input.actionType,
+          startDate: input.startDate,
+          endDate: input.endDate,
+        });
+      }),
+
+    getByUser: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+        limit: z.number().default(100),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin" && ctx.user.id !== input.userId) {
+          throw new Error("Acesso negado");
+        }
+
+        return await getAuditLogsByUser(input.userId, input.limit);
+      }),
+
+    getByActionType: protectedProcedure
+      .input(z.object({
+        actionType: z.string(),
+        limit: z.number().default(100),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Acesso negado");
+        }
+
+        return await getAuditLogsByActionType(input.actionType, input.limit);
+      }),
+
+    deleteOldLogs: protectedProcedure
+      .input(z.object({
+        daysToKeep: z.number().default(90),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Acesso negado");
+        }
+
+        const deletedCount = await deleteOldAuditLogs(input.daysToKeep);
+        
+        await logAuditEvent({
+          userId: ctx.user.id,
+          actionType: 'DELETE',
+          actionDetails: { daysToKeep: input.daysToKeep, deletedCount },
+          status: 'SUCCESS',
+        });
+
+        return { success: true, deletedCount };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
-

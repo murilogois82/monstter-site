@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, contactMessages, InsertContactMessage, ContactMessage } from "../drizzle/schema";
 import { desc, gte, lte, and, eq } from "drizzle-orm";
 import { ENV } from './_core/env';
+import * as bcrypt from 'bcrypt';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -441,6 +442,373 @@ export async function deletePartner(id: number): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("[Database] Failed to delete partner:", error);
+    throw error;
+  }
+}
+
+
+// ==================== AUDIT LOG FUNCTIONS ====================
+
+export interface AuditLogEntry {
+  id?: number;
+  userId: number;
+  actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' | 'PERMISSION_CHANGE' | 'ACCESS_DENIED';
+  targetUserId?: number | null;
+  targetUserName?: string | null;
+  actionDetails?: Record<string, unknown> | null;
+  oldValues?: Record<string, unknown> | null;
+  newValues?: Record<string, unknown> | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  status: 'SUCCESS' | 'FAILED' | 'PENDING';
+  errorMessage?: string | null;
+  createdAt?: Date;
+}
+
+export async function logAuditEvent(entry: AuditLogEntry): Promise<number | null> {
+  try {
+    const pool = require('mysql2/promise').createPool(process.env.DATABASE_URL);
+    const conn = await pool.getConnection();
+    
+    const [result] = await conn.execute(
+      `INSERT INTO audit_logs (
+        userId, actionType, targetUserId, targetUserName, 
+        actionDetails, oldValues, newValues, ipAddress, userAgent, 
+        status, errorMessage, createdAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [
+        entry.userId,
+        entry.actionType,
+        entry.targetUserId || null,
+        entry.targetUserName || null,
+        entry.actionDetails ? JSON.stringify(entry.actionDetails) : null,
+        entry.oldValues ? JSON.stringify(entry.oldValues) : null,
+        entry.newValues ? JSON.stringify(entry.newValues) : null,
+        entry.ipAddress || null,
+        entry.userAgent || null,
+        entry.status,
+        entry.errorMessage || null,
+      ]
+    );
+    
+    conn.release();
+    return (result as any).insertId || null;
+  } catch (error) {
+    console.error("[Audit] Failed to log event:", error);
+    return null;
+  }
+}
+
+export async function getAuditLogs(
+  filters?: {
+    userId?: number;
+    targetUserId?: number;
+    actionType?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+  }
+): Promise<AuditLogEntry[]> {
+  try {
+    const pool = require('mysql2/promise').createPool(process.env.DATABASE_URL);
+    const conn = await pool.getConnection();
+    
+    let query = `SELECT * FROM audit_logs WHERE 1=1`;
+    const params: unknown[] = [];
+
+    if (filters?.userId) {
+      query += ` AND userId = ?`;
+      params.push(filters.userId);
+    }
+
+    if (filters?.targetUserId) {
+      query += ` AND targetUserId = ?`;
+      params.push(filters.targetUserId);
+    }
+
+    if (filters?.actionType) {
+      query += ` AND actionType = ?`;
+      params.push(filters.actionType);
+    }
+
+    if (filters?.startDate) {
+      query += ` AND createdAt >= ?`;
+      params.push(filters.startDate);
+    }
+
+    if (filters?.endDate) {
+      query += ` AND createdAt <= ?`;
+      params.push(filters.endDate);
+    }
+
+    query += ` ORDER BY createdAt DESC`;
+
+    if (filters?.limit) {
+      query += ` LIMIT ?`;
+      params.push(filters.limit);
+
+      if (filters?.offset) {
+        query += ` OFFSET ?`;
+        params.push(filters.offset);
+      }
+    }
+
+    const [rows] = await conn.execute(query, params);
+    conn.release();
+    return (rows as any) || [];
+  } catch (error) {
+    console.error("[Audit] Failed to get logs:", error);
+    return [];
+  }
+}
+
+export async function getAuditLogsByUser(userId: number, limit: number = 100): Promise<AuditLogEntry[]> {
+  return getAuditLogs({ userId, limit });
+}
+
+export async function getAuditLogsByTargetUser(targetUserId: number, limit: number = 100): Promise<AuditLogEntry[]> {
+  return getAuditLogs({ targetUserId, limit });
+}
+
+export async function getAuditLogsByActionType(actionType: string, limit: number = 100): Promise<AuditLogEntry[]> {
+  return getAuditLogs({ actionType, limit });
+}
+
+export async function getAuditLogCount(filters?: {
+  userId?: number;
+  targetUserId?: number;
+  actionType?: string;
+  startDate?: Date;
+  endDate?: Date;
+}): Promise<number> {
+  try {
+    const pool = require('mysql2/promise').createPool(process.env.DATABASE_URL);
+    const conn = await pool.getConnection();
+    
+    let query = `SELECT COUNT(*) as count FROM audit_logs WHERE 1=1`;
+    const params: unknown[] = [];
+
+    if (filters?.userId) {
+      query += ` AND userId = ?`;
+      params.push(filters.userId);
+    }
+
+    if (filters?.targetUserId) {
+      query += ` AND targetUserId = ?`;
+      params.push(filters.targetUserId);
+    }
+
+    if (filters?.actionType) {
+      query += ` AND actionType = ?`;
+      params.push(filters.actionType);
+    }
+
+    if (filters?.startDate) {
+      query += ` AND createdAt >= ?`;
+      params.push(filters.startDate);
+    }
+
+    if (filters?.endDate) {
+      query += ` AND createdAt <= ?`;
+      params.push(filters.endDate);
+    }
+
+    const [rows] = await conn.execute(query, params);
+    conn.release();
+    return (rows as any)?.[0]?.count || 0;
+  } catch (error) {
+    console.error("[Audit] Failed to get count:", error);
+    return 0;
+  }
+}
+
+export async function deleteOldAuditLogs(daysToKeep: number = 90): Promise<number> {
+  try {
+    const pool = require('mysql2/promise').createPool(process.env.DATABASE_URL);
+    const conn = await pool.getConnection();
+    
+    const [result] = await conn.execute(
+      `DELETE FROM audit_logs WHERE createdAt < DATE_SUB(NOW(), INTERVAL ? DAY)`,
+      [daysToKeep]
+    );
+    
+    conn.release();
+    return (result as any).affectedRows || 0;
+  } catch (error) {
+    console.error("[Audit] Failed to delete old logs:", error);
+    return 0;
+  }
+}
+
+
+// ==================== SIMPLE AUTHENTICATION ====================
+
+/**
+ * Hash a password using bcrypt
+ */
+export async function hashPassword(password: string): Promise<string> {
+  const saltRounds = 10;
+  return bcrypt.hash(password, saltRounds);
+}
+
+/**
+ * Compare a password with its hash
+ */
+export async function comparePassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+/**
+ * Login user with username and password
+ */
+export async function loginUser(username: string, password: string) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    // Find user by username using raw SQL
+    const conn = await (db as any).client.getConnection();
+    const [rows] = await conn.execute(
+      "SELECT * FROM users WHERE username = ?",
+      [username]
+    );
+    conn.release();
+
+    const user = (rows as any[])[0];
+    if (!user) {
+      throw new Error("Invalid username or password");
+    }
+
+    if (!user.passwordHash) {
+      throw new Error("User does not have a password set");
+    }
+
+    // Compare password
+    const isPasswordValid = await comparePassword(password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new Error("Invalid username or password");
+    }
+
+    // Return user without password
+    const { passwordHash, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  } catch (error) {
+    console.error("[Auth] Login failed:", error);
+    throw error;
+  }
+}
+
+/**
+ * Create a new user with username and password
+ */
+export async function createUserWithPassword(
+  username: string,
+  password: string,
+  name?: string | null,
+  email?: string | null,
+  role: "user" | "admin" | "manager" | "partner" = "user"
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    // Check if username already exists
+    const conn = await (db as any).client.getConnection();
+    const [existingRows] = await conn.execute(
+      "SELECT id FROM users WHERE username = ?",
+      [username]
+    );
+
+    if ((existingRows as any[]).length > 0) {
+      conn.release();
+      throw new Error("Username already exists");
+    }
+
+    // Hash password
+    const passwordHash = await hashPassword(password);
+
+    // Create user
+    await conn.execute(
+      "INSERT INTO users (username, passwordHash, name, email, role, loginMethod, lastSignedIn) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [username, passwordHash, name || null, email || null, role, "local", new Date()]
+    );
+
+    // Get the created user
+    const [newUserRows] = await conn.execute(
+      "SELECT * FROM users WHERE username = ?",
+      [username]
+    );
+    conn.release();
+
+    const newUser = (newUserRows as any[])[0];
+    if (!newUser) {
+      throw new Error("Failed to create user");
+    }
+
+    const { passwordHash: _, ...userWithoutPassword } = newUser;
+    return userWithoutPassword;
+  } catch (error) {
+    console.error("[Auth] Create user failed:", error);
+    throw error;
+  }
+}
+
+/**
+ * Update user password
+ */
+export async function updateUserPassword(userId: number, newPassword: string) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    const passwordHash = await hashPassword(newPassword);
+    const conn = await (db as any).client.getConnection();
+    await conn.execute(
+      "UPDATE users SET passwordHash = ? WHERE id = ?",
+      [passwordHash, userId]
+    );
+    conn.release();
+
+    return { success: true };
+  } catch (error) {
+    console.error("[Auth] Update password failed:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get user by username
+ */
+export async function getUserByUsername(username: string) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    const conn = await (db as any).client.getConnection();
+    const [rows] = await conn.execute(
+      "SELECT * FROM users WHERE username = ?",
+      [username]
+    );
+    conn.release();
+
+    const user = (rows as any[])[0];
+    if (!user) {
+      return null;
+    }
+
+    const { passwordHash, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  } catch (error) {
+    console.error("[Auth] Get user by username failed:", error);
     throw error;
   }
 }

@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO users (openId, username, passwordHash, name, email, role, loginMethod, lastSignedIn) VALUES ('local-admin', 'admin', '$2b$10$YourHashedPasswordHere', 'Admin', 'admin@example.com', 'admin', 'local', NOW()) ON DUPLICATE KEY UPDATE passwordHash = VALUES(passwordHash);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4XjEEts3MFeNP3d.root --database VHJr573C49poDxnZCnBs44 --execute INSERT INTO users (openId, username, passwordHash, name, email, role, loginMethod, lastSignedIn) VALUES ('local-admin', 'admin', '$2b$10$YourHashedPasswordHere', 'Admin', 'admin@example.com', 'admin', 'local', NOW()) ON DUPLICATE KEY UPDATE passwordHash = VALUES(passwordHash);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 361
+}

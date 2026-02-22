@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO users (openId, username, passwordHash, name, email, role, loginMethod, lastSignedIn) VALUES (NULL, 'admin', '$2b$10$YourHashedPasswordHere', 'Admin', 'admin@example.com', 'admin', 'local', NOW()) ON DUPLICATE KEY UPDATE passwordHash = VALUES(passwordHash);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4XjEEts3MFeNP3d.root --database VHJr573C49poDxnZCnBs44 --execute INSERT INTO users (openId, username, passwordHash, name, email, role, loginMethod, lastSignedIn) VALUES (NULL, 'admin', '$2b$10$YourHashedPasswordHere', 'Admin', 'admin@example.com', 'admin', 'local', NOW()) ON DUPLICATE KEY UPDATE passwordHash = VALUES(passwordHash);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1048 (23000) at line 1: Column 'openId' cannot be null"
+  ]
+}

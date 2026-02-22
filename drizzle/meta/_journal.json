@@ -15,6 +15,13 @@
       "when": 1771711449728,
       "tag": "0001_exotic_micromax",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1771732215637,
+      "tag": "0002_naive_vulcan",
+      "breakpoints": true
     }
   ]
 }

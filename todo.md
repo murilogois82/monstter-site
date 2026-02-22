@@ -386,3 +386,25 @@
 - [x] Criar testes de validação de roles e permissões
 - [x] Documentar sistema de gestão de usuários (GESTAO_USUARIOS.md)
 - [x] Testar fluxo completo de gestão de usuários
+
+
+## Painel de Auditoria de Usuários
+
+- [ ] Criar tabela de auditoria no banco de dados
+- [ ] Implementar funções de registro de auditoria (logging)
+- [ ] Integrar logging em APIs de alteração de permissões
+- [ ] Criar página de painel de auditoria com filtros
+- [ ] Implementar export de relatórios de auditoria em CSV/PDF
+- [ ] Criar testes de auditoria
+- [ ] Documentar sistema de auditoria
+
+
+## Autenticacao Simples (Usuario/Senha)
+
+- [x] Atualizar schema de usuarios com campos de autenticacao
+- [x] Criar APIs de login/logout com validacao de senha
+- [x] Criar pagina de login com formulario
+- [x] Integrar autenticacao nas rotas protegidas
+- [x] Criar usuario admin padrao (admin/admin)
+- [ ] Remover/desabilitar OAuth
+- [x] Testar fluxo completo de autenticacao
