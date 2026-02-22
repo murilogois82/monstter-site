@@ -39,7 +39,7 @@ export default function About() {
           <div className="relative">
             <div className="absolute -inset-4 bg-red-500/20 blur-2xl rounded-full opacity-50" />
             <img 
-              src="/images/consulting-team.jpg" 
+              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663299805690/oDEtNKrQdXUsqLyW.jpg" 
               alt="Nossa Equipe" 
               className="relative w-full rounded-lg shadow-2xl border border-white/10 grayscale hover:grayscale-0 transition-all duration-500"
             />

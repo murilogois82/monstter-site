@@ -100,7 +100,7 @@ export default function Services() {
 
       {/* Methodology */}
       <section className="py-20 bg-[#1A1A1A] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/images/service-tech.jpg')] bg-cover bg-center opacity-5" />
+        <div className="absolute inset-0 bg-[url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663299805690/wTDgTAFeLaZAwBhN.jpg')] bg-cover bg-center opacity-5" />
         <div className="container mx-auto relative z-10">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>

@@ -46,7 +46,7 @@ export default function Contact() {
   return (
     <Layout>
       <section className="py-20 bg-black min-h-[60vh] flex flex-col justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-20" />
+        <div className="absolute inset-0 bg-[url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663299805690/gQYXBgieKBRDMIUr.jpg')] bg-cover bg-center opacity-20" />
         <div className="container mx-auto relative z-10 grid md:grid-cols-2 gap-16">
           
           {/* Contact Info */}

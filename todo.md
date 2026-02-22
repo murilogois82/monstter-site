@@ -365,3 +365,24 @@
 - [x] Implementar loading state para evitar flash ao carregar
 - [x] Testar persistência ao recarregar página
 - [x] Validar que modo é mantido entre sessões
+
+
+## Gestão de Usuários com Permissões
+
+- [ ] Criar tela de gestão de usuários com interface de permissões
+- [ ] Implementar API de atualização de permissões de usuários
+- [ ] Criar página de administração com acesso restrito a admin
+- [ ] Adicionar proteção de rotas para usuários não-admin
+- [ ] Testar fluxo completo de gestão de usuários
+
+
+## Gestão de Usuários com Permissões
+
+- [x] Melhorar tela de gestão de usuários com interface de permissões
+- [x] Implementar busca e filtros de usuários
+- [x] Adicionar export de relatório de usuários em CSV
+- [x] Criar componente ProtectedRoute para proteção de rotas
+- [x] Implementar API de atualização de permissões de usuários
+- [x] Criar testes de validação de roles e permissões
+- [x] Documentar sistema de gestão de usuários (GESTAO_USUARIOS.md)
+- [x] Testar fluxo completo de gestão de usuários
