@@ -177,8 +177,8 @@ export default function UserManagement() {
         u.email || "-",
         u.role,
         u.loginMethod || "OAuth",
-        new Date(u.createdAt).toLocaleDateString("pt-BR"),
-        new Date(u.lastSignedIn).toLocaleDateString("pt-BR"),
+        new Date(u.createdAt || 0).toLocaleDateString("pt-BR"),
+        new Date(u.lastSignedIn || 0).toLocaleDateString("pt-BR"),
       ]),
     ]
       .map((row) => row.join(","))
@@ -361,17 +361,17 @@ export default function UserManagement() {
                           <TableCell className="font-medium text-gray-600">{u.id}</TableCell>
                           <TableCell className="font-medium">{u.name || "-"}</TableCell>
                           <TableCell className="text-gray-600">{u.email || "-"}</TableCell>
-                          <TableCell>{getRoleBadge(u.role)}</TableCell>
+                          <TableCell>{getRoleBadge(u.role || "user")}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-xs">
                               {u.loginMethod || "OAuth"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-sm text-gray-600">
-                            {new Date(u.createdAt).toLocaleDateString("pt-BR")}
+                            {new Date(u.createdAt || 0).toLocaleDateString("pt-BR")}
                           </TableCell>
                           <TableCell className="text-sm text-gray-600">
-                            {new Date(u.lastSignedIn).toLocaleDateString("pt-BR")}
+                            {new Date(u.lastSignedIn || 0).toLocaleDateString("pt-BR")}
                           </TableCell>
                           <TableCell className="text-right">
                             <Button

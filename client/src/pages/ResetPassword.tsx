@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,8 +7,7 @@ import { AlertCircle, CheckCircle2, Loader2, Eye, EyeOff } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 export default function ResetPassword() {
-  const [, params] = useLocation();
-  const [, navigate] = useNavigate();
+  const [, setLocation] = useLocation();
   
   const token = new URLSearchParams(window.location.search).get("token") || "";
   
@@ -62,7 +61,7 @@ export default function ResetPassword() {
       if (result.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate("/login");
+          setLocation("/login");
         }, 2000);
       }
     } catch (err: any) {
@@ -99,7 +98,7 @@ export default function ResetPassword() {
               <AlertCircle className="w-4 h-4" />
               <span className="text-sm">{error}</span>
             </div>
-            <Button className="w-full" onClick={() => navigate("/forgot-password")}>
+            <Button className="w-full" onClick={() => setLocation("/forgot-password")}>
               Solicitar Novo Link
             </Button>
           </CardContent>

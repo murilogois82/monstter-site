@@ -55,7 +55,7 @@ export async function upsertUser(user: InsertUser): Promise<{ id: number } | und
       .values(values)
       .onDuplicateKeyUpdate({ set: updateSet });
 
-    return { id: Number(result.insertId) };
+    return { id: Number((result as any).insertId) };
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
@@ -134,7 +134,7 @@ export async function createUser(user: InsertUser): Promise<{ id: number } | nul
 
   try {
     const result = await db.insert(users).values(user);
-    return { id: Number(result.insertId) };
+    return { id: Number((result as any).insertId) };
   } catch (error) {
     console.error("[Database] Failed to create user:", error);
     throw error;
@@ -152,7 +152,7 @@ export async function createContactMessage(message: InsertContactMessage): Promi
 
   try {
     const result = await db.insert(contactMessages).values(message);
-    return { ...message, id: Number(result.insertId) } as ContactMessage;
+    return { ...message, id: Number((result as any).insertId) } as ContactMessage;
   } catch (error) {
     console.error("[Database] Failed to create contact message:", error);
     throw error;
@@ -182,7 +182,7 @@ export async function updateContactMessageStatus(id: number, status: string): Pr
   }
 
   try {
-    await db.update(contactMessages).set({ status }).where(eq(contactMessages.id, id));
+    await db.update(contactMessages).set({ status: status as any }).where(eq(contactMessages.id, id));
     return true;
   } catch (error) {
     console.error("[Database] Failed to update contact message:", error);
@@ -204,7 +204,7 @@ export async function createServiceOrder(order: InsertServiceOrder): Promise<Ser
 
   try {
     const result = await db.insert(serviceOrders).values(order);
-    return { ...order, id: Number(result.insertId) } as ServiceOrder;
+    return { ...order, id: Number((result as any).insertId) } as ServiceOrder;
   } catch (error) {
     console.error("[Database] Failed to create service order:", error);
     throw error;
@@ -282,7 +282,7 @@ export async function getServiceOrdersByStatus(status: string): Promise<ServiceO
   }
 
   try {
-    return await db.select().from(serviceOrders).where(eq(serviceOrders.status, status)).orderBy(desc(serviceOrders.createdAt));
+    return await db.select().from(serviceOrders).where(eq(serviceOrders.status, status as any)).orderBy(desc(serviceOrders.createdAt));
   } catch (error) {
     console.error("[Database] Failed to get service orders:", error);
     throw error;
@@ -300,7 +300,7 @@ export async function createOSPayment(payment: InsertOSPayment): Promise<OSPayme
 
   try {
     const result = await db.insert(osPayments).values(payment);
-    return { ...payment, id: Number(result.insertId) } as OSPayment;
+    return { ...payment, id: Number((result as any).insertId) } as OSPayment;
   } catch (error) {
     console.error("[Database] Failed to create OS payment:", error);
     throw error;
@@ -375,7 +375,7 @@ export async function createPartner(partner: InsertPartner): Promise<Partner | n
 
   try {
     const result = await db.insert(partners).values(partner);
-    return { ...partner, id: Number(result.insertId) } as Partner;
+    return { ...partner, id: Number((result as any).insertId) } as Partner;
   } catch (error) {
     console.error("[Database] Failed to create partner:", error);
     throw error;

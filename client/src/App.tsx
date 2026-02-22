@@ -20,6 +20,7 @@ import PartnerUserAssociation from "./pages/PartnerUserAssociation";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Login from "./pages/Login";
+import SimpleLogin from "./pages/SimpleLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import CalendarPage from "./pages/CalendarPage";
 
@@ -29,6 +30,7 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/login"} component={Login} />
+      <Route path={"/simple-login"} component={SimpleLogin} />
       <Route path={"/sobre"} component={About} />
       <Route path={"/servicos"} component={Services} />
       <Route path={"/contato"} component={Contact} />

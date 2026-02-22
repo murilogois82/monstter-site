@@ -18,7 +18,7 @@ export default function PartnerDashboard() {
   const { user, isAuthenticated } = useAuth();
 
   // Get partner info for current user
-  const { data: partnerInfo, isLoading: partnerLoading } = trpc.partner.me.useQuery(undefined, {
+  const { data: partnerInfo, isLoading: partnerLoading } = trpc.partner.getMe.useQuery(undefined, {
     enabled: isAuthenticated && user?.role === "partner",
   });
 
