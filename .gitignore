@@ -13,6 +13,8 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+# Nota: .env.production é versionado pois contém apenas variáveis não-sensíveis
+# Valores sensíveis devem ser configurados como GitHub Secrets
 
 # IDE and editor files
 .vscode/
