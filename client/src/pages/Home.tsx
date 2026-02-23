@@ -12,7 +12,7 @@ export default function Home() {
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663299805690/gQYXBgieKBRDMIUr.jpg" 
+            src="/images/hero-bg.jpg" 
             alt="Background Tecnológico" 
             className="w-full h-full object-cover opacity-40"
           />
@@ -89,7 +89,7 @@ export default function Home() {
           <div className="relative group">
             <div className="absolute -inset-4 bg-gradient-to-r from-red-500 to-red-900 rounded-lg opacity-20 blur-xl group-hover:opacity-30 transition-opacity duration-500" />
             <img 
-              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663299805690/oDEtNKrQdXUsqLyW.jpg" 
+              src="/images/team.jpg" 
               alt="Equipe Monstter" 
               className="relative rounded-lg shadow-2xl border border-white/10 grayscale hover:grayscale-0 transition-all duration-700"
             />
@@ -215,7 +215,7 @@ export default function Home() {
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0">
           <img 
-            src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663299805690/HAEsePicDTYgwHnK.jpg" 
+            src="/images/office.jpg" 
             alt="Background Tech" 
             className="w-full h-full object-cover opacity-20"
           />
