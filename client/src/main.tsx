@@ -37,10 +37,14 @@ queryClient.getMutationCache().subscribe(event => {
   }
 });
 
+// Em producao (GitHub Pages), a API esta em api.monstter.com.br
+// Em desenvolvimento, usa o servidor local via proxy Vite
+const API_URL = import.meta.env.VITE_API_URL ?? "/api/trpc";
+
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: "/api/trpc",
+      url: API_URL,
       transformer: superjson,
       fetch(input, init) {
         return globalThis.fetch(input, {
