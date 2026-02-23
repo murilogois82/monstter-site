@@ -1,0 +1,92 @@
+name: Deploy para GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    name: Build e Deploy no GitHub Pages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Obter diretório de cache do pnpm
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Configurar cache do pnpm
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Build do frontend (Vite)
+        run: pnpm vite build
+        env:
+          NODE_ENV: production
+          CI: true
+           VITE_ANALYTICS_ENDPOINT: ${{ secrets.VITE_ANALYTICS_ENDPOINT }}
+           VITE_ANALYTICS_WEBSITE_ID: ${{ secrets.VITE_ANALYTICS_WEBSITE_ID }}
+
+      - name: Atualizar pasta docs com o novo build
+        run: |
+          CNAME_CONTENT=$(cat docs/CNAME 2>/dev/null || echo "monstter.com.br")
+          find docs/ -mindepth 1 ! -name '.gitkeep' -delete 2>/dev/null || rm -rf docs/*
+          cp -r dist/public/. docs/
+          echo "$CNAME_CONTENT" > docs/CNAME
+          echo "Conteúdo da pasta docs após o build:"
+          ls -la docs/
+
+      - name: Verificar se há mudanças para commit
+        id: check_changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "Nenhuma mudança detectada — deploy ignorado."
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Mudanças detectadas — realizando deploy..."
+          fi
+
+      - name: Commit e push do build para o GitHub Pages
+        if: steps.check_changes.outputs.has_changes == 'true'
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          BUILD_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          git commit -m "chore: deploy automático via GitHub Actions [skip ci]
+
+          - Build gerado em: ${BUILD_DATE}
+          - Branch: ${REF_NAME}
+          - Commit de origem: ${SHA}"
+          git push origin main
