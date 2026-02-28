@@ -24,6 +24,28 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    // TEMPORARY: Setup endpoint to update admin password (remove after use)
+    setupAdminPassword: publicProcedure
+      .input(z.object({
+        setupKey: z.string(),
+        newPassword: z.string().min(8),
+      }))
+      .mutation(async ({ input }) => {
+        const SETUP_KEY = 'MONSTTER_SETUP_2025_TEMP';
+        if (input.setupKey !== SETUP_KEY) {
+          throw new Error('Chave de setup inválida');
+        }
+        const db = await getDb();
+        if (!db) throw new Error('Banco de dados não disponível');
+        const passwordHash = await hashPassword(input.newPassword);
+        const conn = await (db as any).client.getConnection();
+        await conn.execute(
+          'UPDATE users SET passwordHash = ? WHERE username = ? AND role = ?',
+          [passwordHash, 'admin', 'admin']
+        );
+        conn.release();
+        return { success: true, message: 'Senha do admin atualizada com sucesso' };
+      }),
     loginLocal: publicProcedure
       .input(z.object({
         username: z.string().min(3),
