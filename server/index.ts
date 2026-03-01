@@ -10,10 +10,10 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
-  // Serve static files from dist/public in production
+  // Serve static files from docs in production (KingHost deployment)
   const staticPath =
     process.env.NODE_ENV === "production"
-      ? path.resolve(__dirname, "public")
+      ? path.resolve(__dirname, "..", "docs")
       : path.resolve(__dirname, "..", "dist", "public");
 
   app.use(express.static(staticPath));
