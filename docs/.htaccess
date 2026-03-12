@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Se o arquivo solicitado existe, não redireciona
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  
+  # Redireciona tudo para o index.php (ou index.html se PHP não estiver disponível)
+  RewriteRule ^ index.php [L]
+</IfModule>
