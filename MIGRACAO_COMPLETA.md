@@ -191,5 +191,4 @@ A migração foi completada com sucesso. O projeto agora possui um sistema de au
 
 ---
 
-**Desenvolvido com Manus**
-Data: 14 de Março de 2026
+
