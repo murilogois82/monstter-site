@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalAuth } from "@/_core/hooks/useLocalAuth";
 import Layout from "@/components/Layout";
 import AdminNav from "@/components/AdminNav";
 import { trpc } from "@/lib/trpc";
@@ -38,7 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import ClientImport from "@/components/ClientImport";
 
 export default function ClientManagement() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useLocalAuth();
   const [, setLocation] = useLocation();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);

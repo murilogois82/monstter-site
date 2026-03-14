@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalAuth } from "@/_core/hooks/useLocalAuth";
 import Layout from "./Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -23,7 +23,7 @@ export default function ProtectedRoute({
   requiredRoles = [],
   fallback,
 }: ProtectedRouteProps) {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useLocalAuth();
   const [, setLocation] = useLocation();
 
   // Ainda carregando

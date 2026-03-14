@@ -1,4 +1,4 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalAuth } from "@/_core/hooks/useLocalAuth";
 import { trpc } from "@/lib/trpc";
 import Layout from "@/components/Layout";
 import AdminNav from "@/components/AdminNav";
@@ -25,7 +25,7 @@ import {
 } from "recharts";
 
 export default function PaymentsDashboard() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useLocalAuth();
   const [, setLocation] = useLocation();
   const [periodStart, setPeriodStart] = useState<Date>(subMonths(new Date(), 1));
   const [periodEnd, setPeriodEnd] = useState<Date>(new Date());

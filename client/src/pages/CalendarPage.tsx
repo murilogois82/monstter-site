@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalAuth } from "@/_core/hooks/useLocalAuth";
 import { trpc } from "@/lib/trpc";
 import Layout from "@/components/Layout";
 import CalendarComponent from "@/components/CalendarComponent";
@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Clock, User, CheckCircle2 } from "lucide-react";
 
 export default function CalendarPage() {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useLocalAuth();
   const [, setLocation] = useLocation();
   const [selectedPartner, setSelectedPartner] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalAuth } from "@/_core/hooks/useLocalAuth";
 import Layout from "@/components/Layout";
 import AdminNav from "@/components/AdminNav";
 import { trpc } from "@/lib/trpc";
@@ -34,7 +34,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 export default function PartnerUserAssociation() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useLocalAuth();
   const [, setLocation] = useLocation();
   const [isAssociateDialogOpen, setIsAssociateDialogOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<any>(null);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalAuth } from "@/_core/hooks/useLocalAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,7 @@ import Layout from "@/components/Layout";
 import AdminNav from "@/components/AdminNav";
 
 export default function AdminServiceOrders() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useLocalAuth();
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [paymentData, setPaymentData] = useState({
     osId: 0,

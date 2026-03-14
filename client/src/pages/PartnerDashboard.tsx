@@ -1,4 +1,4 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalAuth } from "@/_core/hooks/useLocalAuth";
 import Layout from "@/components/Layout";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 
 export default function PartnerDashboard() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useLocalAuth();
 
   // Get partner info for current user
   const { data: partnerInfo, isLoading: partnerLoading } = trpc.partner.getMe.useQuery(undefined, {

@@ -1,10 +1,10 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalAuth } from "@/_core/hooks/useLocalAuth";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 import Layout from "@/components/Layout";
 
 export default function Login() {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useLocalAuth();
   const [, setLocation] = useLocation();
 
   useEffect(() => {

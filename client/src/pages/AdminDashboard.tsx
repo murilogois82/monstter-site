@@ -1,4 +1,4 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalAuth } from "@/_core/hooks/useLocalAuth";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 import Layout from "@/components/Layout";
@@ -17,7 +17,7 @@ import {
 import { useViewMode } from "@/contexts/ViewModeContext";
 
 export default function AdminDashboard() {
-  const { user, isAuthenticated, loading, logout } = useAuth();
+  const { user, isAuthenticated, loading, logout } = useLocalAuth();
   const { viewMode, toggleViewMode } = useViewMode();
   const [, setLocation] = useLocation();
 
