@@ -16,6 +16,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { label: "Parceiros", path: "/partners/service-orders" },
   ];
 
+  const restrictedAreaItem = { label: "Área Restrita", path: "/restricted-area" };
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans selection:bg-primary selection:text-white">
       {/* Top Bar */}
@@ -67,6 +69,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </Link>
             ))}
+            <Link href={restrictedAreaItem.path}>
+              <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50 font-bold rounded-none px-6 mr-2">
+                {restrictedAreaItem.label}
+              </Button>
+            </Link>
             <Link href="/contato">
               <Button variant="default" className="bg-primary hover:bg-red-700 text-white font-bold rounded-none px-6 border border-transparent hover:border-red-500 hover:shadow-[0_0_15px_rgba(255,0,0,0.5)] transition-all duration-300">
                 Fale Conosco
@@ -100,6 +107,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </div>
                 </Link>
               ))}
+              <Link href={restrictedAreaItem.path}>
+                <Button className="w-full border-blue-500 text-blue-600 hover:bg-blue-50 font-bold rounded-none mt-2 border">
+                  {restrictedAreaItem.label}
+                </Button>
+              </Link>
               <Link href="/contato">
                 <Button className="w-full bg-primary hover:bg-red-700 text-white font-bold rounded-none mt-2">
                   Fale Conosco
